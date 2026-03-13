@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<meta charset="UTF-8">
+<title>QR Analytics</title>
+
+<link rel="stylesheet" href="style.css">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+</head>
+
+<body>
+
+<div class="layout">
+
+<aside class="sidebar">
+
+<h2>QR Analytics</h2>
+
+<ul>
+
+<li onclick="showPage('dashboard')">Dashboard</li>
+<li onclick="showPage('qr')">QR Codes</li>
+<li onclick="showPage('logs')">Scan Logs</li>
+
+</ul>
+
+</aside>
+
+<main class="content">
+
+<section id="dashboard">
+
+<h1>Overview</h1>
+
+<div class="stats">
+
+<div class="card">
+<p>Total Scan</p>
+<h2 id="totalScan">0</h2>
+</div>
+
+<div class="card">
+<p>Today Scan</p>
+<h2 id="todayScan">0</h2>
+</div>
+
+<div class="card">
+<p>Total QR</p>
+<h2 id="totalQR">0</h2>
+</div>
+
+</div>
+
+<div class="card">
+<canvas id="scanChart"></canvas>
+</div>
+
+</section>
+
+<section id="qr" class="hidden">
+
+<h1>QR Codes</h1>
+
+<div id="qrGrid" class="grid"></div>
+
+</section>
+
+<section id="detail" class="hidden">
+
+<h1 id="qrTitle"></h1>
+
+<div class="card">
+
+<p>Total Scan</p>
+<h2 id="qrTotal"></h2>
+
+</div>
+
+<div class="card">
+
+<canvas id="deviceChart"></canvas>
+
+</div>
+
+<div class="card">
+
+<h3>Recent Scan</h3>
+
+<table id="logTable">
+
+<tr>
+<th>Time</th>
+<th>IP</th>
+<th>Device</th>
+</tr>
+
+</table>
+
+</div>
+
+</section>
+
+<section id="logs" class="hidden">
+
+<h1>All Scan Logs</h1>
+
+<table id="allLogs">
+
+<tr>
+<th>Time</th>
+<th>QR</th>
+<th>IP</th>
+<th>Device</th>
+</tr>
+
+</table>
+
+</section>
+
+</main>
+
+</div>
+
+<script src="app.js"></script>
+
+</body>
+
+</html>
