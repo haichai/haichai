@@ -49,6 +49,11 @@
 </div>
 
 <div class="card">
+<p>Unique Scanners</p>
+<h2 id="uniqueScan">0</h2>
+</div>
+
+<div class="card">
 <p>Total QR</p>
 <h2 id="totalQR">0</h2>
 </div>
@@ -124,6 +129,7 @@
 <section id="logs" class="hidden">
 
 <h1>All Scan Logs</h1>
+<p id="logsSummary" class="summary"></p>
 
 <div class="date-filter">
   <label>
@@ -133,6 +139,10 @@
   <label>
     To
     <input id="logsToDate" type="date" />
+  </label>
+  <label class="checkbox">
+    <input id="uniqueIpOnly" type="checkbox" />
+    Unique IP only
   </label>
   <button id="applyLogsDateFilter">Filter</button>
   <button id="clearLogsDateFilter">Clear</button>
