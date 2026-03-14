@@ -56,6 +56,23 @@
 </div>
 
 <div class="card">
+  <div class="date-filter">
+    <label>
+      From
+      <input id="fromDate" type="date" />
+    </label>
+    <label>
+      To
+      <input id="toDate" type="date" />
+    </label>
+    <button id="applyDateFilter">Filter</button>
+    <button id="clearDateFilter">Clear</button>
+  </div>
+  <p>Filtered Scan</p>
+  <h2 id="rangeScan">0</h2>
+</div>
+
+<div class="card">
 <canvas id="scanChart"></canvas>
 </div>
 
@@ -107,6 +124,19 @@
 <section id="logs" class="hidden">
 
 <h1>All Scan Logs</h1>
+
+<div class="date-filter">
+  <label>
+    From
+    <input id="logsFromDate" type="date" />
+  </label>
+  <label>
+    To
+    <input id="logsToDate" type="date" />
+  </label>
+  <button id="applyLogsDateFilter">Filter</button>
+  <button id="clearLogsDateFilter">Clear</button>
+</div>
 
 <table id="allLogs">
 
