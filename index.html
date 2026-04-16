@@ -47,14 +47,16 @@
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 flex flex-col">
                 <h2 class="text-xl font-bold mb-4 text-gray-700">Lượt quét theo ID (Cơ sở)</h2>
-                <canvas id="idChart" height="200"></canvas>
+                <div class="relative flex-grow h-72 w-full">
+                    <canvas id="idChart"></canvas>
+                </div>
             </div>
-            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 flex flex-col">
                 <h2 class="text-xl font-bold mb-4 text-gray-700">Lượt quét theo Thành phố</h2>
-                <div class="flex justify-center">
-                    <canvas id="cityChart" height="200"></canvas>
+                <div class="relative flex-grow h-72 w-full flex justify-center">
+                    <canvas id="cityChart"></canvas>
                 </div>
             </div>
         </div>
@@ -85,7 +87,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
-        // Mình đã điền sẵn Config của bạn vào đây, KHÔNG CẦN SỬA GÌ CẢ
         const firebaseConfig = {
             apiKey: "AIzaSyD_VeofclR5xZI0g_PQv2nSXEM-Dek3kMY",
             authDomain: "haichai-tracking.firebaseapp.com",
