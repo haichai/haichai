@@ -1,172 +1,259 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="vi">
 <head>
-
-<meta charset="UTF-8">
-<title>VSS QR Analytics </title>
-
-<link rel="stylesheet" href="style.css">
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Haichai QR Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
+<body class="bg-gray-50 p-6 font-sans">
 
-<body>
+    <div class="max-w-7xl mx-auto">
+        <div class="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-800">Haichai Dashboard</h1>
+                <p class="text-gray-500">Hệ thống theo dõi mã QR thời gian thực</p>
+            </div>
+            <div class="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold shadow-lg flex items-center gap-2">
+                <span>Tổng lượt quét:</span>
+                <span id="totalScans" class="text-3xl">0</span>
+            </div>
+        </div>
 
-<div class="layout">
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 mb-8 flex flex-wrap items-end gap-4">
+            <div class="flex flex-col">
+                <label class="text-xs text-gray-500 mb-1 font-semibold uppercase">Từ ngày</label>
+                <input type="date" id="filterStartDate" class="border border-gray-300 rounded-lg p-2 text-sm focus:outline-none focus:border-blue-500">
+            </div>
+            <div class="flex flex-col">
+                <label class="text-xs text-gray-500 mb-1 font-semibold uppercase">Đến ngày</label>
+                <input type="date" id="filterEndDate" class="border border-gray-300 rounded-lg p-2 text-sm focus:outline-none focus:border-blue-500">
+            </div>
+            <div class="flex flex-col min-w-[200px]">
+                <label class="text-xs text-gray-500 mb-1 font-semibold uppercase">Lọc theo mã QR</label>
+                <select id="filterQR" class="border border-gray-300 rounded-lg p-2 text-sm focus:outline-none focus:border-blue-500">
+                    <option value="ALL">-- Tất cả mã QR --</option>
+                    </select>
+            </div>
+            <div class="flex gap-2">
+                <button id="btnApplyFilter" class="bg-gray-800 hover:bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-semibold transition">
+                    Lọc Dữ Liệu
+                </button>
+                <button id="btnClearFilter" class="bg-red-50 hover:bg-red-100 text-red-600 px-4 py-2 rounded-lg text-sm font-semibold transition">
+                    Xóa Lọc
+                </button>
+            </div>
+        </div>
 
-<aside class="sidebar">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                <h2 class="text-xl font-bold mb-4 text-gray-700">Lượt quét theo ID (Cơ sở)</h2>
+                <canvas id="idChart" height="200"></canvas>
+            </div>
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                <h2 class="text-xl font-bold mb-4 text-gray-700">Lượt quét theo Thành phố</h2>
+                <div class="flex justify-center">
+                    <canvas id="cityChart" height="200"></canvas>
+                </div>
+            </div>
+        </div>
 
-<h2>VSS QR Analytics</h2>
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div class="p-6 border-b border-gray-100 flex justify-between items-center">
+                <h2 class="text-xl font-bold text-gray-700">Chi tiết lượt quét (100 lượt gần nhất)</h2>
+                <span id="showingCount" class="text-sm text-gray-500">Đang hiển thị: 0</span>
+            </div>
+            <div class="overflow-x-auto max-h-[500px]">
+                <table class="w-full text-left border-collapse">
+                    <thead class="sticky top-0 bg-gray-50 shadow-sm">
+                        <tr class="text-gray-600 text-sm">
+                            <th class="p-4 border-b font-semibold">Thời gian</th>
+                            <th class="p-4 border-b font-semibold">Mã ID</th>
+                            <th class="p-4 border-b font-semibold">Thành phố</th>
+                            <th class="p-4 border-b font-semibold">Thiết bị</th>
+                        </tr>
+                    </thead>
+                    <tbody id="logTableBody" class="text-sm">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 
-<ul>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
-<li onclick="showPage('dashboard')">Dashboard</li>
-<li onclick="showPage('qr')">QR Codes</li>
-<li onclick="showPage('logs')">Scan Logs</li>
+        // ====================================================================
+        // ĐIỀN CẤU HÌNH FIREBASE CỦA BẠN VÀO ĐÂY 
+        // ====================================================================
+       / Your web app's Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyD_VeofclR5xZI0g_PQv2nSXEM-Dek3kMY",
+  authDomain: "haichai-tracking.firebaseapp.com",
+  databaseURL: "https://haichai-tracking-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "haichai-tracking",
+  storageBucket: "haichai-tracking.firebasestorage.app",
+  messagingSenderId: "967741417841",
+  appId: "1:967741417841:web:4da562376c02fbb1a26ed0"
+};
 
-</ul>
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
 
-</aside>
+        let idChartInstance = null;
+        let cityChartInstance = null;
+        
+        // Biến lưu trữ toàn bộ data gốc kéo từ Firebase
+        let allLogs = []; 
 
-<main class="content">
+        // Hàm chuyển đổi chuỗi giờ Việt Nam (VD: "15:30:00, 15/4/2026") sang chuẩn YYYY-MM-DD để so sánh
+        function parseDateString(timeStr) {
+            try {
+                if (!timeStr) return null;
+                const parts = timeStr.split(', ');
+                if (parts.length < 2) return null;
+                const dateParts = parts[1].split('/');
+                // Format thành YYYY-MM-DD
+                return `${dateParts[2]}-${dateParts[1].padStart(2, '0')}-${dateParts[0].padStart(2, '0')}`;
+            } catch (e) {
+                return null;
+            }
+        }
 
-<section id="dashboard">
+        // Cập nhật danh sách QR cho dropdown Lọc
+        function updateQRDropdown(dataArray) {
+            const qrSelect = document.getElementById('filterQR');
+            const currentSelection = qrSelect.value; // Giữ lại lựa chọn hiện tại nếu có
+            
+            // Lấy danh sách ID duy nhất
+            const uniqueIDs = [...new Set(dataArray.map(log => log.id).filter(Boolean))];
+            
+            let html = '<option value="ALL">-- Tất cả mã QR --</option>';
+            uniqueIDs.forEach(id => {
+                html += `<option value="${id}">${id}</option>`;
+            });
+            
+            qrSelect.innerHTML = html;
+            if (uniqueIDs.includes(currentSelection)) {
+                qrSelect.value = currentSelection;
+            }
+        }
 
-<h1>Overview</h1>
+        // Hàm Render giao diện dựa trên dữ liệu đã lọc
+        function renderDashboard(dataToRender) {
+            document.getElementById('totalScans').innerText = dataToRender.length;
 
-<div class="stats">
+            const idCount = {};
+            const cityCount = {};
+            let tableHtml = '';
 
-<div class="card">
-<p>Total Scan</p>
-<h2 id="totalScan">0</h2>
-</div>
+            // Lấy tối đa 100 log mới nhất để hiển thị ra bảng tránh nặng máy
+            const displayLogs = dataToRender.slice(0, 100);
+            document.getElementById('showingCount').innerText = `Đang hiển thị: ${displayLogs.length} / ${dataToRender.length}`;
 
-<div class="card">
-<p>Today Scan</p>
-<h2 id="todayScan">0</h2>
-</div>
+            dataToRender.forEach(log => {
+                idCount[log.id || 'Unknown'] = (idCount[log.id || 'Unknown'] || 0) + 1;
+                const city = log.city || "Chưa xác định";
+                cityCount[city] = (cityCount[city] || 0) + 1;
+            });
 
-<div class="card">
-<p>Unique Scanners</p>
-<h2 id="uniqueScan">0</h2>
-</div>
+            displayLogs.forEach(log => {
+                tableHtml += `
+                    <tr class="hover:bg-blue-50 transition border-b border-gray-100">
+                        <td class="p-4 whitespace-nowrap text-gray-500">${log.time}</td>
+                        <td class="p-4 font-bold text-blue-600">${log.id}</td>
+                        <td class="p-4 text-gray-700">${log.city || '-'}</td>
+                        <td class="p-4 text-gray-400 text-xs truncate max-w-[200px]" title="${log.ua}">${log.ua}</td>
+                    </tr>
+                `;
+            });
+            document.getElementById('logTableBody').innerHTML = tableHtml;
 
-<div class="card">
-<p>Total QR</p>
-<h2 id="totalQR">0</h2>
-</div>
+            // Render Biểu đồ ID
+            if(idChartInstance) idChartInstance.destroy();
+            const idCtx = document.getElementById('idChart').getContext('2d');
+            idChartInstance = new Chart(idCtx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(idCount),
+                    datasets: [{
+                        label: 'Lượt quét',
+                        data: Object.values(idCount),
+                        backgroundColor: '#3b82f6',
+                        borderRadius: 4
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
 
-</div>
+            // Render Biểu đồ Thành phố
+            if(cityChartInstance) cityChartInstance.destroy();
+            const cityCtx = document.getElementById('cityChart').getContext('2d');
+            cityChartInstance = new Chart(cityCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(cityCount),
+                    datasets: [{
+                        data: Object.values(cityCount),
+                        backgroundColor: ['#f97316', '#3b82f6', '#10b981', '#8b5cf6', '#ef4444', '#64748b']
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+        }
 
-<div class="card">
-  <div class="date-filter">
-    <label>
-      From
-      <input id="fromDate" type="date" />
-    </label>
-    <label>
-      To
-      <input id="toDate" type="date" />
-    </label>
-    <button id="applyDateFilter">Filter</button>
-    <button id="clearDateFilter">Clear</button>
-  </div>
-  <p>Filtered Scan</p>
-  <h2 id="rangeScan">0</h2>
-</div>
+        // Hàm áp dụng bộ lọc
+        function applyFilters() {
+            const startDate = document.getElementById('filterStartDate').value;
+            const endDate = document.getElementById('filterEndDate').value;
+            const selectedQR = document.getElementById('filterQR').value;
 
-<div class="card">
-<canvas id="scanChart"></canvas>
-</div>
+            const filteredData = allLogs.filter(log => {
+                // Lọc theo QR ID
+                if (selectedQR !== 'ALL' && log.id !== selectedQR) {
+                    return false;
+                }
 
-</section>
+                // Lọc theo ngày
+                const logDateStr = parseDateString(log.time);
+                if (logDateStr) {
+                    if (startDate && logDateStr < startDate) return false;
+                    if (endDate && logDateStr > endDate) return false;
+                }
 
-<section id="qr" class="hidden">
+                return true;
+            });
 
-<h1>QR Codes</h1>
+            renderDashboard(filteredData);
+        }
 
-<div id="qrGrid" class="grid"></div>
+        // Lắng nghe sự kiện click nút Lọc
+        document.getElementById('btnApplyFilter').addEventListener('click', applyFilters);
 
-</section>
+        // Lắng nghe sự kiện click nút Xóa Lọc
+        document.getElementById('btnClearFilter').addEventListener('click', () => {
+            document.getElementById('filterStartDate').value = '';
+            document.getElementById('filterEndDate').value = '';
+            document.getElementById('filterQR').value = 'ALL';
+            renderDashboard(allLogs);
+        });
 
-<section id="detail" class="hidden">
+        // Kéo dữ liệu từ Firebase
+        const logsRef = ref(db, 'logs');
+        onValue(logsRef, (snapshot) => {
+            const data = snapshot.val();
+            if (!data) return;
 
-<h1 id="qrTitle"></h1>
-
-<div class="card">
-
-<p>Total Scan</p>
-<h2 id="qrTotal"></h2>
-
-</div>
-
-<div class="card">
-
-<canvas id="deviceChart"></canvas>
-
-</div>
-
-<div class="card">
-
-<h3>Recent Scan</h3>
-
-<table id="logTable">
-
-<tr>
-<th>Time</th>
-<th>IP</th>
-<th>Device</th>
-</tr>
-
-</table>
-
-</div>
-
-</section>
-
-<section id="logs" class="hidden">
-
-<h1>All Scan Logs</h1>
-<p id="logsSummary" class="summary"></p>
-
-<div class="date-filter">
-  <label>
-    From
-    <input id="logsFromDate" type="date" />
-  </label>
-  <label>
-    To
-    <input id="logsToDate" type="date" />
-  </label>
-  <label class="checkbox">
-    <input id="uniqueIpOnly" type="checkbox" />
-    Unique IP only
-  </label>
-  <button id="applyLogsDateFilter">Filter</button>
-  <button id="clearLogsDateFilter">Clear</button>
-</div>
-
-<table id="allLogs">
-
-<tr>
-<th>Time</th>
-<th>QR</th>
-<th>IP</th>
-<th>Device</th>
-</tr>
-
-</table>
-
-</section>
-
-</main>
-
-</div>
-
-<script src="app.js"></script>
-
+            // Chuyển Object thành mảng và đảo ngược (mới nhất lên đầu)
+            allLogs = Object.values(data).reverse(); 
+            
+            updateQRDropdown(allLogs);
+            
+            // Tự động áp dụng bộ lọc hiện tại (nếu có) khi có log mới đẩy về realtime
+            applyFilters(); 
+        });
+    </script>
 </body>
-
 </html>
