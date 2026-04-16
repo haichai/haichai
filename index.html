@@ -40,49 +40,71 @@
                 </div>
             </div>
 
-            <div class="bg-white rounded-xl shadow-sm border border-blue-200 mb-8 overflow-hidden flex flex-col md:flex-row">
-                <div class="p-6 flex-1 bg-blue-50/40">
-                    <div class="flex items-center justify-between mb-4">
-                        <div>
-                            <h2 class="text-xl font-bold text-gray-800">Tạo mã QR Động (Dynamic QR)</h2>
-                            <p class="text-sm text-gray-500">Mã QR cố định, có thể thay đổi link đích đến bất cứ lúc nào.</p>
+            <div class="bg-white rounded-xl shadow-sm border border-blue-200 mb-8 overflow-hidden">
+                <div class="flex flex-col md:flex-row border-b border-gray-100">
+                    <div class="p-6 flex-1 bg-blue-50/40" id="qrFormSection">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <h2 class="text-xl font-bold text-gray-800">Tạo & Cập Nhật Mã QR Động</h2>
+                                <p class="text-sm text-gray-500">Mã QR cố định, có thể thay đổi link đích đến bất cứ lúc nào.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div class="flex gap-4">
+                                <div class="w-1/3">
+                                    <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Tên miền hệ thống</label>
+                                    <input type="text" id="qrBaseUrl" value="https://store.haichai.workers.dev/" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm bg-gray-100 text-gray-500 cursor-not-allowed" disabled>
+                                </div>
+                                <div class="w-2/3">
+                                    <label class="block text-xs font-bold text-blue-600 uppercase mb-1">ID Chiến dịch (Viết liền không dấu)</label>
+                                    <input type="text" id="qrIdInput" placeholder="VD: toroi_oceanpark" class="w-full border-2 border-blue-200 rounded-lg p-2 text-sm focus:outline-none focus:border-blue-500 bg-white font-mono placeholder-gray-300">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-green-600 uppercase mb-1">Link Đích Đến (Khách quét sẽ bay vào đây)</label>
+                                <input type="text" id="qrDestInput" placeholder="VD: https://facebook.com/haichaifollow" class="w-full border-2 border-green-200 rounded-lg p-2 text-sm focus:outline-none focus:border-green-500 bg-white font-mono placeholder-gray-300">
+                            </div>
+
+                            <div class="pt-2 flex items-center justify-between">
+                                <p class="text-xs text-gray-500">Mã QR sẽ trỏ về: <span id="qrResultLink" class="text-blue-600 font-mono font-semibold">Chưa có</span></p>
+                                <button id="btnSaveAndGenerate" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg text-sm transition shadow-md">
+                                    Lưu Link & Cập Nhật QR
+                                </button>
+                            </div>
                         </div>
                     </div>
                     
-                    <div class="space-y-4">
-                        <div class="flex gap-4">
-                            <div class="w-1/3">
-                                <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Tên miền hệ thống</label>
-                                <input type="text" id="qrBaseUrl" value="https://store.haichai.workers.dev/" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm bg-gray-100 text-gray-500 cursor-not-allowed" disabled>
-                            </div>
-                            <div class="w-2/3">
-                                <label class="block text-xs font-bold text-blue-600 uppercase mb-1">ID Chiến dịch (Viết liền không dấu)</label>
-                                <input type="text" id="qrIdInput" placeholder="VD: toroi_oceanpark" class="w-full border-2 border-blue-200 rounded-lg p-2 text-sm focus:outline-none focus:border-blue-500 bg-white font-mono placeholder-gray-300">
-                            </div>
+                    <div class="p-6 md:w-1/3 border-t md:border-t-0 md:border-l border-gray-100 flex flex-col items-center justify-center bg-white">
+                        <div class="bg-white p-2 border border-gray-200 rounded-xl shadow-sm mb-4 relative">
+                            <canvas id="qrCanvas" class="rounded-lg opacity-20 transition-opacity duration-300"></canvas>
                         </div>
-
-                        <div>
-                            <label class="block text-xs font-bold text-green-600 uppercase mb-1">Link Đích Đến (Khách quét sẽ bay vào đây)</label>
-                            <input type="text" id="qrDestInput" placeholder="VD: https://facebook.com/haichaifollow" class="w-full border-2 border-green-200 rounded-lg p-2 text-sm focus:outline-none focus:border-green-500 bg-white font-mono placeholder-gray-300">
-                        </div>
-
-                        <div class="pt-2 flex items-center justify-between">
-                            <p class="text-xs text-gray-500">Mã QR sẽ trỏ về: <span id="qrResultLink" class="text-blue-600 font-mono font-semibold">Chưa có</span></p>
-                            <button id="btnSaveAndGenerate" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg text-sm transition shadow-md">
-                                Lưu Link & Tạo QR
-                            </button>
-                        </div>
+                        <button id="btnDownloadQR" class="w-full bg-gray-800 hover:bg-gray-900 text-white font-semibold py-2 px-4 rounded-lg text-sm transition flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                            Tải ảnh QR (PNG)
+                        </button>
+                        <p id="saveStatus" class="text-green-600 text-xs font-bold mt-2 text-center h-4"></p>
                     </div>
                 </div>
-                
-                <div class="p-6 md:w-1/3 border-t md:border-t-0 md:border-l border-gray-100 flex flex-col items-center justify-center bg-white">
-                    <div class="bg-white p-2 border border-gray-200 rounded-xl shadow-sm mb-4">
-                        <canvas id="qrCanvas" class="rounded-lg opacity-20 transition-opacity duration-300"></canvas>
+
+                <div class="p-6 bg-white">
+                    <h3 class="text-sm font-bold text-gray-700 uppercase mb-3">Danh sách Mã QR đang hoạt động</h3>
+                    <div class="overflow-y-auto max-h-48 border border-gray-200 rounded-lg">
+                        <table class="w-full text-left border-collapse text-sm">
+                            <thead class="bg-gray-50 sticky top-0 shadow-sm">
+                                <tr class="text-gray-600">
+                                    <th class="p-3 border-b font-semibold w-1/4">ID Chiến dịch</th>
+                                    <th class="p-3 border-b font-semibold w-2/4">Link đích đến (URL)</th>
+                                    <th class="p-3 border-b font-semibold w-1/4 text-center">Hành động</th>
+                                </tr>
+                            </thead>
+                            <tbody id="linksTableBody">
+                                <tr>
+                                    <td colspan="3" class="p-4 text-center text-gray-400">Đang tải danh sách...</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
-                    <button id="btnDownloadQR" class="w-full bg-gray-800 hover:bg-gray-900 text-white font-semibold py-2 px-4 rounded-lg text-sm transition flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-                        Tải ảnh QR (PNG)
-                    </button>
-                    <p id="saveStatus" class="text-green-600 text-xs font-bold mt-2 text-center h-4"></p>
                 </div>
             </div>
 
@@ -147,7 +169,6 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        // Import thêm hàm `set` để ghi dữ liệu lên nhánh Links
         import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
 
@@ -169,10 +190,11 @@
         let idChartInstance = null;
         let cityChartInstance = null;
         let allLogs = []; 
-        let dbListener = null; 
+        let logsListener = null; 
+        let linksListener = null;
 
         // ==========================================
-        // TÍNH NĂNG TẠO MÃ QR ĐỘNG (LƯU VÀO FIREBASE)
+        // TÍNH NĂNG TẠO & SỬA MÃ QR ĐỘNG
         // ==========================================
         const qrBaseUrlInput = document.getElementById('qrBaseUrl');
         const qrIdInput = document.getElementById('qrIdInput');
@@ -183,7 +205,6 @@
         const qrCanvas = document.getElementById('qrCanvas');
         const saveStatus = document.getElementById('saveStatus');
         
-        // Khởi tạo đối tượng QR trắng
         const qr = new QRious({
             element: qrCanvas,
             value: 'https://haichai.vn',
@@ -192,48 +213,46 @@
             foreground: '#1f2937'
         });
 
-        // Xử lý khi bấm nút Lưu & Tạo
+        // Hàm Cập nhật giao diện khi điền form
+        function updateQRPreview() {
+            let baseUrl = qrBaseUrlInput.value.trim();
+            let id = qrIdInput.value.trim();
+            if(baseUrl && !baseUrl.endsWith('/')) baseUrl += '/';
+            const finalUrl = baseUrl + id;
+            qrResultLink.innerText = id ? finalUrl : 'Chưa có';
+            qr.value = id ? finalUrl : 'https://haichai.vn';
+        }
+        qrIdInput.addEventListener('input', updateQRPreview);
+
+        // Nút Lưu/Sửa Link
         btnSaveAndGenerate.addEventListener('click', () => {
             const id = qrIdInput.value.trim();
             const destUrl = qrDestInput.value.trim();
-            let baseUrl = qrBaseUrlInput.value.trim();
             
             if(!id || !destUrl) {
                 alert("Sếp vui lòng điền đầy đủ ID Chiến dịch và Link đích đến nhé!");
                 return;
             }
 
-            // Đổi text nút thành Đang lưu
             btnSaveAndGenerate.innerText = "Đang lưu...";
             btnSaveAndGenerate.disabled = true;
 
-            // 1. Lưu Link Đích vào Firebase Database (nhánh links/ID)
+            // Ghi đè Link Đích vào Firebase (nếu trùng ID sẽ tự động cập nhật link)
             set(ref(db, 'links/' + id), destUrl).then(() => {
-                // 2. Nếu lưu thành công -> Vẽ mã QR
-                if(baseUrl && !baseUrl.endsWith('/')) baseUrl += '/';
-                const finalUrl = baseUrl + id;
-                
-                qrResultLink.innerText = finalUrl;
-                qr.value = finalUrl;
-                
-                // Hiển thị QR rõ lên và cho phép tải
+                updateQRPreview();
                 qrCanvas.classList.remove('opacity-20');
                 btnDownloadQR.disabled = false;
                 
-                // Báo thành công
-                saveStatus.innerText = "✓ Đã lưu link và tạo QR thành công!";
-                setTimeout(() => saveStatus.innerText = "", 5000);
-
+                saveStatus.innerText = "✓ Đã lưu thành công!";
+                setTimeout(() => saveStatus.innerText = "", 4000);
             }).catch((error) => {
                 alert("Lỗi khi lưu link: " + error.message);
             }).finally(() => {
-                // Khôi phục nút bấm
-                btnSaveAndGenerate.innerText = "Lưu Link & Tạo QR";
+                btnSaveAndGenerate.innerText = "Lưu Link & Cập Nhật QR";
                 btnSaveAndGenerate.disabled = false;
             });
         });
 
-        // Nút tải ảnh QR về máy
         btnDownloadQR.addEventListener('click', () => {
             const link = document.createElement('a');
             const fileName = qrIdInput.value.trim() ? `QR_${qrIdInput.value.trim()}.png` : 'QR_Code.png';
@@ -242,9 +261,59 @@
             link.click();
         });
 
+        // Đổ dữ liệu vào Danh sách Link
+        function renderLinksTable(linksData) {
+            const tbody = document.getElementById('linksTableBody');
+            tbody.innerHTML = '';
+
+            if (!linksData || Object.keys(linksData).length === 0) {
+                tbody.innerHTML = `<tr><td colspan="3" class="p-4 text-center text-gray-400">Chưa có mã QR nào được tạo.</td></tr>`;
+                return;
+            }
+
+            // Lấy danh sách ID và đảo ngược để hiển thị cái mới lên trên
+            const keys = Object.keys(linksData).reverse();
+
+            keys.forEach(id => {
+                const url = linksData[id];
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-blue-50 transition border-b border-gray-100";
+                
+                tr.innerHTML = `
+                    <td class="p-3 font-bold text-blue-600">${id}</td>
+                    <td class="p-3 text-gray-500 truncate max-w-xs" title="${url}">${url}</td>
+                    <td class="p-3 text-center">
+                        <button class="btn-edit text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1 rounded shadow-sm font-semibold transition" data-id="${id}" data-url="${url}">
+                            Sửa ✏️
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            // Gắn sự kiện cho các nút Sửa
+            document.querySelectorAll('.btn-edit').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const id = this.getAttribute('data-id');
+                    const url = this.getAttribute('data-url');
+                    
+                    // Điền dữ liệu lên form
+                    qrIdInput.value = id;
+                    qrDestInput.value = url;
+                    updateQRPreview();
+                    
+                    // Sáng nút bấm & cuộn lên form
+                    qrCanvas.classList.remove('opacity-20');
+                    btnDownloadQR.disabled = false;
+                    document.getElementById('qrFormSection').scrollIntoView({ behavior: 'smooth' });
+                    qrDestInput.focus();
+                });
+            });
+        }
+
 
         // ==========================================
-        // KIỂM TRA ĐĂNG NHẬP VÀ XỬ LÝ DASHBOARD
+        // XỬ LÝ AUTH & DASHBOARD LOGS
         // ==========================================
         onAuthStateChanged(auth, (user) => {
             const loginScreen = document.getElementById('loginScreen');
@@ -282,7 +351,8 @@
 
         document.getElementById('btnLogOut').addEventListener('click', () => {
             signOut(auth).then(() => {
-                if(dbListener) dbListener(); 
+                if(logsListener) logsListener(); 
+                if(linksListener) linksListener();
                 allLogs = [];
             });
         });
@@ -301,10 +371,8 @@
             const qrSelect = document.getElementById('filterQR');
             const currentSelection = qrSelect.value; 
             const uniqueIDs = [...new Set(dataArray.map(log => log.id).filter(Boolean))];
-            
             let html = '<option value="ALL">-- Tất cả mã QR --</option>';
             uniqueIDs.forEach(id => { html += `<option value="${id}">${id}</option>`; });
-            
             qrSelect.innerHTML = html;
             if (uniqueIDs.includes(currentSelection)) qrSelect.value = currentSelection;
         }
@@ -353,7 +421,7 @@
                 type: 'doughnut',
                 data: {
                     labels: Object.keys(cityCount),
-                    datasets: [{ data: Object.values(cityCount), backgroundColor: ['#f97316', '#3b82f6', '#10b981', '#8b5cf6', '#ef4444', '#64748b'] }]
+                    datasets: [{ data: Object.values(cityCount), backgroundColor: ['#f97316', 'ed603c', '#10b981', '#8b5cf6', '#ef4444', '#64748b'] }]
                 },
                 options: { responsive: true, maintainAspectRatio: false }
             });
@@ -385,13 +453,22 @@
         });
 
         function loadDashboardData() {
+            // Lắng nghe dữ liệu Lịch sử quét (Logs)
             const logsRef = ref(db, 'logs');
-            dbListener = onValue(logsRef, (snapshot) => {
+            logsListener = onValue(logsRef, (snapshot) => {
                 const data = snapshot.val();
-                if (!data) return;
-                allLogs = Object.values(data).reverse(); 
-                updateQRDropdown(allLogs);
-                applyFilters(); 
+                if (data) {
+                    allLogs = Object.values(data).reverse(); 
+                    updateQRDropdown(allLogs);
+                    applyFilters(); 
+                }
+            });
+
+            // Lắng nghe dữ liệu Danh sách Link
+            const linksRef = ref(db, 'links');
+            linksListener = onValue(linksRef, (snapshot) => {
+                const linksData = snapshot.val();
+                renderLinksTable(linksData);
             });
         }
     </script>
