@@ -34,7 +34,7 @@
                 <label class="text-xs text-gray-500 mb-1 font-semibold uppercase">Lọc theo mã QR</label>
                 <select id="filterQR" class="border border-gray-300 rounded-lg p-2 text-sm focus:outline-none focus:border-blue-500">
                     <option value="ALL">-- Tất cả mã QR --</option>
-                    </select>
+                </select>
             </div>
             <div class="flex gap-2">
                 <button id="btnApplyFilter" class="bg-gray-800 hover:bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-semibold transition">
@@ -85,49 +85,40 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
-        // ====================================================================
-        // ĐIỀN CẤU HÌNH FIREBASE CỦA BẠN VÀO ĐÂY 
-        // ====================================================================
-       / Your web app's Firebase configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyD_VeofclR5xZI0g_PQv2nSXEM-Dek3kMY",
-  authDomain: "haichai-tracking.firebaseapp.com",
-  databaseURL: "https://haichai-tracking-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "haichai-tracking",
-  storageBucket: "haichai-tracking.firebasestorage.app",
-  messagingSenderId: "967741417841",
-  appId: "1:967741417841:web:4da562376c02fbb1a26ed0"
-};
+        // Mình đã điền sẵn Config của bạn vào đây, KHÔNG CẦN SỬA GÌ CẢ
+        const firebaseConfig = {
+            apiKey: "AIzaSyD_VeofclR5xZI0g_PQv2nSXEM-Dek3kMY",
+            authDomain: "haichai-tracking.firebaseapp.com",
+            databaseURL: "https://haichai-tracking-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "haichai-tracking",
+            storageBucket: "haichai-tracking.firebasestorage.app",
+            messagingSenderId: "967741417841",
+            appId: "1:967741417841:web:4da562376c02fbb1a26ed0"
+        };
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
         let idChartInstance = null;
         let cityChartInstance = null;
-        
-        // Biến lưu trữ toàn bộ data gốc kéo từ Firebase
         let allLogs = []; 
 
-        // Hàm chuyển đổi chuỗi giờ Việt Nam (VD: "15:30:00, 15/4/2026") sang chuẩn YYYY-MM-DD để so sánh
         function parseDateString(timeStr) {
             try {
                 if (!timeStr) return null;
                 const parts = timeStr.split(', ');
                 if (parts.length < 2) return null;
                 const dateParts = parts[1].split('/');
-                // Format thành YYYY-MM-DD
                 return `${dateParts[2]}-${dateParts[1].padStart(2, '0')}-${dateParts[0].padStart(2, '0')}`;
             } catch (e) {
                 return null;
             }
         }
 
-        // Cập nhật danh sách QR cho dropdown Lọc
         function updateQRDropdown(dataArray) {
             const qrSelect = document.getElementById('filterQR');
-            const currentSelection = qrSelect.value; // Giữ lại lựa chọn hiện tại nếu có
+            const currentSelection = qrSelect.value; 
             
-            // Lấy danh sách ID duy nhất
             const uniqueIDs = [...new Set(dataArray.map(log => log.id).filter(Boolean))];
             
             let html = '<option value="ALL">-- Tất cả mã QR --</option>';
@@ -141,7 +132,6 @@ const firebaseConfig = {
             }
         }
 
-        // Hàm Render giao diện dựa trên dữ liệu đã lọc
         function renderDashboard(dataToRender) {
             document.getElementById('totalScans').innerText = dataToRender.length;
 
@@ -149,7 +139,6 @@ const firebaseConfig = {
             const cityCount = {};
             let tableHtml = '';
 
-            // Lấy tối đa 100 log mới nhất để hiển thị ra bảng tránh nặng máy
             const displayLogs = dataToRender.slice(0, 100);
             document.getElementById('showingCount').innerText = `Đang hiển thị: ${displayLogs.length} / ${dataToRender.length}`;
 
@@ -171,7 +160,6 @@ const firebaseConfig = {
             });
             document.getElementById('logTableBody').innerHTML = tableHtml;
 
-            // Render Biểu đồ ID
             if(idChartInstance) idChartInstance.destroy();
             const idCtx = document.getElementById('idChart').getContext('2d');
             idChartInstance = new Chart(idCtx, {
@@ -188,7 +176,6 @@ const firebaseConfig = {
                 options: { responsive: true, maintainAspectRatio: false }
             });
 
-            // Render Biểu đồ Thành phố
             if(cityChartInstance) cityChartInstance.destroy();
             const cityCtx = document.getElementById('cityChart').getContext('2d');
             cityChartInstance = new Chart(cityCtx, {
@@ -204,35 +191,27 @@ const firebaseConfig = {
             });
         }
 
-        // Hàm áp dụng bộ lọc
         function applyFilters() {
             const startDate = document.getElementById('filterStartDate').value;
             const endDate = document.getElementById('filterEndDate').value;
             const selectedQR = document.getElementById('filterQR').value;
 
             const filteredData = allLogs.filter(log => {
-                // Lọc theo QR ID
                 if (selectedQR !== 'ALL' && log.id !== selectedQR) {
                     return false;
                 }
-
-                // Lọc theo ngày
                 const logDateStr = parseDateString(log.time);
                 if (logDateStr) {
                     if (startDate && logDateStr < startDate) return false;
                     if (endDate && logDateStr > endDate) return false;
                 }
-
                 return true;
             });
-
             renderDashboard(filteredData);
         }
 
-        // Lắng nghe sự kiện click nút Lọc
         document.getElementById('btnApplyFilter').addEventListener('click', applyFilters);
 
-        // Lắng nghe sự kiện click nút Xóa Lọc
         document.getElementById('btnClearFilter').addEventListener('click', () => {
             document.getElementById('filterStartDate').value = '';
             document.getElementById('filterEndDate').value = '';
@@ -240,18 +219,12 @@ const firebaseConfig = {
             renderDashboard(allLogs);
         });
 
-        // Kéo dữ liệu từ Firebase
         const logsRef = ref(db, 'logs');
         onValue(logsRef, (snapshot) => {
             const data = snapshot.val();
             if (!data) return;
-
-            // Chuyển Object thành mảng và đảo ngược (mới nhất lên đầu)
             allLogs = Object.values(data).reverse(); 
-            
             updateQRDropdown(allLogs);
-            
-            // Tự động áp dụng bộ lọc hiện tại (nếu có) khi có log mới đẩy về realtime
             applyFilters(); 
         });
     </script>
