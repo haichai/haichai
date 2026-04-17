@@ -157,6 +157,14 @@
         import { getDatabase, ref, onValue, set, push, get } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
 
+        // ==========================================
+        // KHAI BÁO DANH SÁCH EMAIL NGOẠI LỆ Ở ĐÂY
+        // ==========================================
+        const VIP_EMAILS = [
+            'ngocanhn1410@gmail.com',
+            'thuctapsinh2@gmail.com'
+        ];
+
         const firebaseConfig = {
             apiKey: "AIzaSyD_VeofclR5xZI0g_PQv2nSXEM-Dek3kMY",
             authDomain: "haichai-tracking.firebaseapp.com",
@@ -401,32 +409,51 @@
             renderChartsAndLogs(allLogs);
         });
 
+        // ==========================================
         // XỬ LÝ AUTH VÀ KÉO DỮ LIỆU
+        // ==========================================
         onAuthStateChanged(auth, user => {
-            if (user && user.email.endsWith('@starspirits.vn')) {
-                document.getElementById('loginScreen').classList.add('hidden');
-                document.getElementById('mainDashboard').classList.remove('hidden');
-                document.getElementById('userInfo').innerText = user.email;
-                
-                // Lắng nghe nhánh Link
-                onValue(ref(db, 'links'), snap => renderLinksTable(snap.val()));
-                
-                // Lắng nghe nhánh Lịch sử quét
-                onValue(ref(db, 'logs'), snap => {
-                    const data = snap.val();
-                    if (data) {
-                        allLogs = Object.values(data).reverse();
-                        updateQRDropdown(allLogs);
-                        applyFilters();
-                    }
-                });
+            if (user) {
+                // Kiểm tra xem email có thuộc tên miền công ty HOẶC nằm trong danh sách VIP không
+                if (user.email.endsWith('@starspirits.vn') || VIP_EMAILS.includes(user.email)) {
+                    document.getElementById('loginScreen').classList.add('hidden');
+                    document.getElementById('mainDashboard').classList.remove('hidden');
+                    document.getElementById('userInfo').innerText = user.email;
+                    
+                    // Lắng nghe nhánh Link
+                    onValue(ref(db, 'links'), snap => renderLinksTable(snap.val()));
+                    
+                    // Lắng nghe nhánh Lịch sử quét
+                    onValue(ref(db, 'logs'), snap => {
+                        const data = snap.val();
+                        if (data) {
+                            allLogs = Object.values(data).reverse();
+                            updateQRDropdown(allLogs);
+                            applyFilters();
+                        }
+                    });
+                } else {
+                    signOut(auth).then(() => {
+                        const errEl = document.getElementById('loginError');
+                        errEl.innerText = `Email ${user.email} chưa được cấp quyền truy cập!`;
+                        errEl.classList.remove('hidden');
+                    });
+                }
             } else {
-                if (user) signOut(auth).then(() => alert("Chỉ dùng email starspirits.vn!"));
                 document.getElementById('loginScreen').classList.remove('hidden');
+                document.body.classList.add('overflow-hidden');
             }
         });
 
-        document.getElementById('btnLogin').addEventListener('click', () => signInWithPopup(auth, provider));
+        document.getElementById('btnLogin').addEventListener('click', () => {
+            document.getElementById('loginError').classList.add('hidden');
+            signInWithPopup(auth, provider).catch(error => {
+                const errEl = document.getElementById('loginError');
+                errEl.innerText = "Lỗi đăng nhập: " + error.message;
+                errEl.classList.remove('hidden');
+            });
+        });
+        
         document.getElementById('btnLogOut').addEventListener('click', () => { signOut(auth); window.location.reload(); });
         document.getElementById('btnCloseHistory').addEventListener('click', () => document.getElementById('historyModal').classList.add('hidden'));
 
