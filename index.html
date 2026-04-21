@@ -324,13 +324,20 @@
         // ==========================================
         // KHU VỰC RENDER BIỂU ĐỒ & LOG QUÉT
         // ==========================================
+        
+        // HÀM PARSE DATE MỚI (Dùng Regex để bắt mọi định dạng có ngày tháng)
         function parseDateString(timeStr) {
             try {
                 if (!timeStr) return null;
-                const parts = timeStr.split(', ');
-                if (parts.length < 2) return null;
-                const dateParts = parts[1].split('/');
-                return `${dateParts[2]}-${dateParts[1].padStart(2, '0')}-${dateParts[0].padStart(2, '0')}`;
+                // Regex tìm kiếm mẫu DD/MM/YYYY hoặc D/M/YYYY
+                const match = timeStr.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+                if (!match) return null;
+                
+                const day = match[1].padStart(2, '0');
+                const month = match[2].padStart(2, '0');
+                const year = match[3];
+                
+                return `${year}-${month}-${day}`; // Trả về định dạng chuẩn YYYY-MM-DD
             } catch (e) { return null; }
         }
 
@@ -392,15 +399,23 @@
             });
         }
 
+        // CẬP NHẬT LOGIC LỌC
         function applyFilters() {
             const startDate = document.getElementById('filterStartDate').value;
             const endDate = document.getElementById('filterEndDate').value;
             const selectedQR = document.getElementById('filterQR').value;
 
             const filteredData = allLogs.filter(log => {
+                // 1. Lọc theo QR ID
                 if (selectedQR !== 'ALL' && log.id !== selectedQR) return false;
-                const logDateStr = parseDateString(log.time);
-                if (logDateStr) {
+                
+                // 2. Lọc theo Ngày
+                if (startDate || endDate) {
+                    const logDateStr = parseDateString(log.time);
+                    
+                    // Nếu ngày chọn có thiết lập nhưng data không có ngày hợp lệ -> loại luôn
+                    if (!logDateStr) return false; 
+                    
                     if (startDate && logDateStr < startDate) return false;
                     if (endDate && logDateStr > endDate) return false;
                 }
@@ -422,16 +437,13 @@
         // ==========================================
         onAuthStateChanged(auth, user => {
             if (user) {
-                // Kiểm tra xem email có thuộc tên miền công ty HOẶC nằm trong danh sách VIP không
                 if (user.email.endsWith('@starspirits.vn') || VIP_EMAILS.includes(user.email)) {
                     document.getElementById('loginScreen').classList.add('hidden');
                     document.getElementById('mainDashboard').classList.remove('hidden');
                     document.getElementById('userInfo').innerText = user.email;
                     
-                    // Lắng nghe nhánh Link
                     onValue(ref(db, 'links'), snap => renderLinksTable(snap.val()));
                     
-                    // Lắng nghe nhánh Lịch sử quét
                     onValue(ref(db, 'logs'), snap => {
                         const data = snap.val();
                         if (data) {
