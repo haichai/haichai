@@ -1,0 +1,43 @@
+<div class="bg-white rounded-xl shadow-sm border border-orange-200 mb-8 overflow-hidden">
+    <div class="p-6 bg-orange-50/40 border-b border-orange-100">
+        <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
+            </svg>
+            Google Drive Cloner (Server-to-Server)
+        </h2>
+        <p class="text-sm text-gray-500 italic">Clone nhanh file từ đối tác quay chụp về Drive công ty không qua trung gian máy tính.</p>
+    </div>
+    
+    <div class="p-6 space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label class="block text-xs font-bold text-gray-700 uppercase mb-1">ID File/Folder Nguồn (Từ bên quay chụp)</label>
+                <input type="text" id="driveSourceId" placeholder="Dán ID file hoặc link Drive vào đây" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:border-orange-500 focus:outline-none font-mono">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Thư mục đích (ID Folder công ty)</label>
+                <input type="text" id="driveDestFolderId" placeholder="Mặc định: Thư mục Media" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:border-orange-500 focus:outline-none font-mono">
+            </div>
+        </div>
+        
+        <div class="flex items-center justify-between bg-orange-50 p-3 rounded-lg border border-orange-100">
+            <p class="text-xs text-orange-700 leading-relaxed">
+                <strong>Lưu ý:</strong> File nguồn phải được bên quay chụp để chế độ "Bất kỳ ai có liên kết đều có thể xem" (Viewer) để máy chủ có thể copy.
+            </p>
+            <button id="btnCloneDrive" class="bg-orange-600 hover:bg-orange-700 text-white font-bold py-2 px-8 rounded-lg text-sm shadow-md transition-all active:scale-95 flex items-center gap-2">
+                Bắt đầu Clone 🚀
+            </button>
+        </div>
+        
+        <div id="cloneProgress" class="hidden space-y-2">
+            <div class="flex justify-between text-xs font-bold">
+                <span id="cloneStatusText" class="text-blue-600 italic uppercase">Đang kết nối API...</span>
+                <span id="clonePercent">0%</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2">
+                <div id="cloneProgressBar" class="bg-blue-600 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+        </div>
+    </div>
+</div>
