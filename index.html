@@ -36,8 +36,8 @@
         </div>
     </div>
 
-    <div id="mainDashboard" class="h-full overflow-y-auto hidden p-6">
-        <div class="max-w-7xl mx-auto">
+    <div id="mainDashboard" class="h-full overflow-y-auto hidden p-6 flex flex-col">
+        <div class="max-w-7xl mx-auto flex-grow w-full">
             
             <div class="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
@@ -49,12 +49,22 @@
                     </div>
                 </div>
                 <div class="flex flex-wrap items-center gap-3">
+                    <!-- NÚT MỚI: Tạo popup giới thiệu (Nằm bên trái Copy file drive) -->
+                    <a href="https://haichai.github.io/luckyspin/" target="_blank" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-3 rounded-xl font-bold shadow-md flex items-center gap-2 transition-all text-sm">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
+                        </svg>
+                        Tạo popup giới thiệu
+                    </a>
+                    
+                    <!-- Nút cũ: Copy file drive -->
                     <a href="https://script.google.com/a/macros/starspirits.vn/s/AKfycbyf86tNLIRveUFEOBFZmS1kUrpMTHlVKSTbpDM2XudoI1zax7qGC54jZRuTiqDD0keHdQ/exec" target="_blank" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-3 rounded-xl font-bold shadow-md flex items-center gap-2 transition-all text-sm">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path>
                         </svg>
                         Copy file drive
                     </a>
+                    
                     <div class="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold shadow-lg flex items-center gap-2">
                         <span>Tổng lượt quét:</span>
                         <span id="totalScans" class="text-3xl">0</span>
@@ -157,6 +167,12 @@
                     </table>
                 </div>
             </div>
+            
+            <!-- FOOTER MỚI ĐƯỢC THÊM VÀO ĐÂY -->
+            <footer class="w-full text-center py-6 text-gray-400 text-sm font-medium border-t border-gray-200 mt-auto">
+                Created by quang
+            </footer>
+
         </div>
     </div>
 
