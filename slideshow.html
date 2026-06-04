@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Công Cụ Tạo Caption Tự Động cho Slideshow</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        /* Custom scrollbar for better appearance */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+        
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="min-h-screen text-gray-800">
+
+    <div class="max-w-4xl mx-auto px-4 py-8">
+        
+        <!-- Header -->
+        <header class="text-center mb-10">
+            <h1 class="text-3xl md:text-4xl font-bold text-blue-600 mb-2">
+                <i class="fa-solid fa-wand-magic-sparkles mr-2"></i>Slideshow Caption Generator
+            </h1>
+            <p class="text-gray-600">Tạo câu chuyện liên kết cho slideshow của bạn chỉ trong vài giây.</p>
+        </header>
+
+        <!-- Main Content Area -->
+        <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+            
+            <!-- Input Form -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="md:col-span-2">
+                    <label for="topicInput" class="block text-sm font-medium text-gray-700 mb-1">Từ khóa / Chủ đề (Ví dụ: Cuộc đời Steve Jobs)</label>
+                    <input type="text" id="topicInput" placeholder="Nhập chủ đề bạn muốn kể..." 
+                           class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow outline-none text-gray-700">
+                </div>
+                <div>
+                    <label for="countInput" class="block text-sm font-medium text-gray-700 mb-1">Số lượng đoạn (slide)</label>
+                    <input type="number" id="countInput" min="1" max="50" value="10" 
+                           class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow outline-none text-gray-700">
+                </div>
+            </div>
+            
+            <!-- Additional Options -->
+            <div class="mb-8 p-4 bg-blue-50 rounded-lg border border-blue-100">
+                <h3 class="text-sm font-semibold text-blue-800 mb-3"><i class="fa-solid fa-sliders mr-2"></i>Tùy chọn phong cách</h3>
+                <div class="flex flex-wrap gap-4">
+                    <label class="inline-flex items-center">
+                        <input type="radio" name="styleOption" value="kể chuyện" checked class="form-radio text-blue-600 focus:ring-blue-500">
+                        <span class="ml-2 text-sm text-gray-700">Kể chuyện cảm hứng</span>
+                    </label>
+                    <label class="inline-flex items-center">
+                        <input type="radio" name="styleOption" value="tóm tắt thông tin" class="form-radio text-blue-600 focus:ring-blue-500">
+                        <span class="ml-2 text-sm text-gray-700">Tóm tắt thông tin</span>
+                    </label>
+                    <label class="inline-flex items-center">
+                        <input type="radio" name="styleOption" value="hài hước" class="form-radio text-blue-600 focus:ring-blue-500">
+                        <span class="ml-2 text-sm text-gray-700">Hài hước / Gần gũi</span>
+                    </label>
+                    <label class="inline-flex items-center">
+                        <input type="radio" name="styleOption" value="quote ngắn, câu nói triết lý, truyền cảm hứng sâu sắc và thấm thía" class="form-radio text-blue-600 focus:ring-blue-500">
+                        <span class="ml-2 text-sm text-gray-700">Quote ngắn (Truyền cảm hứng)</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Action Button -->
+            <div class="text-center mb-8">
+                <button id="generateBtn" onclick="generateCaptions()" 
+                        class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center mx-auto w-full md:w-auto">
+                    <i class="fa-solid fa-bolt mr-2"></i> Tạo Caption Ngay
+                </button>
+            </div>
+
+            <!-- Loading State -->
+            <div id="loadingState" class="hidden flex-col items-center justify-center py-10">
+                <div class="loader mb-4"></div>
+                <p class="text-gray-500 font-medium animate-pulse">Đang sáng tác câu chuyện cho bạn...</p>
+            </div>
+
+            <!-- Results Section -->
+            <div id="resultsArea" class="hidden">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold text-gray-800 border-b-2 border-blue-500 pb-1 inline-block">Kết quả tạo</h2>
+                    <button onclick="copyAll()" class="text-sm text-blue-600 hover:text-blue-800 font-medium flex items-center bg-blue-50 px-3 py-1.5 rounded hover:bg-blue-100 transition-colors">
+                        <i class="fa-regular fa-copy mr-1"></i> Copy Tất Cả
+                    </button>
+                </div>
+                
+                <div id="captionsContainer" class="space-y-4">
+                    <!-- Captions will be injected here -->
+                </div>
+            </div>
+
+        </div>
+        
+        <!-- Notification Toast -->
+        <div id="toast" class="fixed bottom-5 right-5 transform translate-y-20 opacity-0 transition-all duration-300 bg-gray-800 text-white px-4 py-3 rounded shadow-lg flex items-center z-50">
+            <i class="fa-solid fa-circle-check text-green-400 mr-2"></i>
+            <span id="toastMessage">Đã copy thành công!</span>
+        </div>
+        
+    </div>
+
+    <script>
+        // Default API Key (Empty so Canvas uses runtime key)
+        const API_KEY = ""; 
+        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${API_KEY}`;
+
+        // DOM Elements
+        const topicInput = document.getElementById('topicInput');
+        const countInput = document.getElementById('countInput');
+        const generateBtn = document.getElementById('generateBtn');
+        const loadingState = document.getElementById('loadingState');
+        const resultsArea = document.getElementById('resultsArea');
+        const captionsContainer = document.getElementById('captionsContainer');
+        const toast = document.getElementById('toast');
+        const toastMessage = document.getElementById('toastMessage');
+
+        let generatedCaptions = []; // Store current captions for "Copy All"
+
+        async function generateCaptions() {
+            const topic = topicInput.value.trim();
+            const count = parseInt(countInput.value);
+            const style = document.querySelector('input[name="styleOption"]:checked').value;
+
+            // Basic Validation
+            if (!topic) {
+                showToast("Vui lòng nhập chủ đề!", "error");
+                topicInput.focus();
+                return;
+            }
+            if (isNaN(count) || count < 1 || count > 50) {
+                showToast("Số lượng đoạn phải từ 1 đến 50!", "error");
+                countInput.focus();
+                return;
+            }
+
+            // UI Update: Show Loading
+            generateBtn.disabled = true;
+            generateBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Đang xử lý...';
+            generateBtn.classList.add('opacity-70', 'cursor-not-allowed');
+            loadingState.classList.remove('hidden');
+            loadingState.classList.add('flex');
+            resultsArea.classList.add('hidden');
+            captionsContainer.innerHTML = ''; // Clear previous
+
+            // Xử lý độ dài đặc biệt cho phong cách Quote ngắn
+            let lengthConstraint = "- Đủ ngắn để hiển thị trên 1 slide ảnh/video (khoảng 1-3 câu ngắn).";
+            if (style.includes("quote ngắn")) {
+                lengthConstraint = "- CỰC KỲ NGẮN GỌN. Mỗi đoạn CHỈ LÀ 1 CÂU DUY NHẤT (tối đa 15-20 chữ). Súc tích, cô đọng, đậm chất châm ngôn để làm trích dẫn (quote). KHÔNG diễn giải dài dòng.";
+            }
+
+            // Construct System Prompt
+            const systemPrompt = `Bạn là một chuyên gia viết content và kịch bản cho video ngắn/slideshow (như TikTok, Reels, Shorts). 
+Nhiệm vụ của bạn là tạo ra một mạch nội dung liên kết dựa trên chủ đề người dùng cung cấp.
+Quan trọng: Chia nội dung thành ĐÚNG số lượng đoạn mà người dùng yêu cầu.
+Mỗi đoạn phải:
+${lengthConstraint}
+- Liên kết chặt chẽ hoặc tiếp nối ý với đoạn trước và đoạn sau để tạo thành một mạch cảm xúc hoặc câu chuyện hoàn chỉnh.
+- Mang phong cách: ${style}.
+- KHÔNG sử dụng các từ đánh số như "Đoạn 1:", "Slide 1:" ở đầu câu, chỉ trả về nội dung text trực tiếp.
+
+Trả về kết quả dưới định dạng JSON là một mảng các chuỗi, ví dụ: ["nội dung slide 1", "nội dung slide 2", ...].`;
+
+            const userPrompt = `Chủ đề: ${topic}\nSố lượng slide/đoạn yêu cầu: ${count}`;
+
+            // API Payload setup for structured JSON output
+            const payload = {
+                contents: [{ parts: [{ text: userPrompt }] }],
+                systemInstruction: { parts: [{ text: systemPrompt }] },
+                generationConfig: {
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: "ARRAY",
+                        items: { type: "STRING" }
+                    }
+                }
+            };
+
+            try {
+                // Exponential backoff helper for fetch
+                const fetchWithRetry = async (url, options, retries = 3, delay = 1000) => {
+                    for (let i = 0; i < retries; i++) {
+                        try {
+                            const res = await fetch(url, options);
+                            if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+                            return await res.json();
+                        } catch (e) {
+                            if (i === retries - 1) throw e;
+                            await new Promise(res => setTimeout(res, delay * Math.pow(2, i))); // Exponential backoff
+                        }
+                    }
+                };
+
+                const result = await fetchWithRetry(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    
+                    const jsonText = result.candidates[0].content.parts[0].text;
+                    generatedCaptions = JSON.parse(jsonText);
+                    
+                    // Verify count (LLMs might sometimes miss the exact count, though JSON schema helps)
+                    if(generatedCaptions.length !== count) {
+                         console.warn(`Requested ${count} items, but got ${generatedCaptions.length}.`);
+                    }
+
+                    renderCaptions(generatedCaptions);
+                } else {
+                    throw new Error("Invalid response structure from API");
+                }
+
+            } catch (error) {
+                console.error("Error generating content:", error);
+                showToast("Đã có lỗi xảy ra. Vui lòng thử lại sau.", "error");
+                captionsContainer.innerHTML = `
+                    <div class="p-4 bg-red-50 text-red-600 rounded-lg border border-red-200">
+                        <p><i class="fa-solid fa-triangle-exclamation mr-2"></i>Không thể tạo nội dung lúc này. Lỗi kết nối hoặc API.</p>
+                    </div>`;
+                resultsArea.classList.remove('hidden');
+            } finally {
+                // UI Update: Hide Loading, Restore Button
+                generateBtn.disabled = false;
+                generateBtn.innerHTML = '<i class="fa-solid fa-bolt mr-2"></i> Tạo Caption Ngay';
+                generateBtn.classList.remove('opacity-70', 'cursor-not-allowed');
+                loadingState.classList.add('hidden');
+                loadingState.classList.remove('flex');
+            }
+        }
+
+        function renderCaptions(captions) {
+            captionsContainer.innerHTML = '';
+            
+            if(captions.length === 0) {
+                captionsContainer.innerHTML = '<p class="text-gray-500 italic">Không có dữ liệu được tạo.</p>';
+                resultsArea.classList.remove('hidden');
+                return;
+            }
+
+            captions.forEach((caption, index) => {
+                const slideNum = index + 1;
+                const safeCaption = caption.replace(/"/g, '&quot;'); // Escape quotes for HTML attribute
+                
+                const itemHtml = `
+                    <div class="bg-gray-50 rounded-lg p-4 border border-gray-200 hover:border-blue-300 transition-colors group relative">
+                        <div class="flex items-start gap-4">
+                            <div class="flex-shrink-0 w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold text-sm">
+                                ${slideNum}
+                            </div>
+                            <div class="flex-grow">
+                                <p class="text-gray-800 text-lg leading-relaxed pt-1 pr-12" id="caption-text-${index}">
+                                    ${caption}
+                                </p>
+                            </div>
+                        </div>
+                        <button onclick="copySingle('${safeCaption}', this)" class="absolute top-4 right-4 text-gray-400 hover:text-blue-600 transition-colors p-2 bg-white rounded-md shadow-sm border border-gray-100 opacity-0 group-hover:opacity-100 focus:opacity-100" title="Copy đoạn này">
+                            <i class="fa-regular fa-copy"></i>
+                        </button>
+                    </div>
+                `;
+                captionsContainer.insertAdjacentHTML('beforeend', itemHtml);
+            });
+
+            resultsArea.classList.remove('hidden');
+            
+            // Scroll to results smoothly
+            setTimeout(() => {
+                resultsArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
+        }
+
+        // Fallback copy function since navigator.clipboard might fail in iframes
+        function fallbackCopyTextToClipboard(text) {
+            var textArea = document.createElement("textarea");
+            textArea.value = text;
+            
+            // Avoid scrolling to bottom
+            textArea.style.top = "0";
+            textArea.style.left = "0";
+            textArea.style.position = "fixed";
+
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+
+            try {
+                var successful = document.execCommand('copy');
+                return successful;
+            } catch (err) {
+                console.error('Fallback: Oops, unable to copy', err);
+                return false;
+            } finally {
+                document.body.removeChild(textArea);
+            }
+        }
+
+        async function copyText(text) {
+            if (!navigator.clipboard) {
+                return fallbackCopyTextToClipboard(text);
+            }
+            try {
+                await navigator.clipboard.writeText(text);
+                return true;
+            } catch (err) {
+                console.error('Async: Could not copy text: ', err);
+                // Fallback if async clipboard fails (often due to iframe permissions)
+                return fallbackCopyTextToClipboard(text);
+            }
+        }
+
+        async function copySingle(text, btnElement) {
+            const success = await copyText(text);
+            if (success) {
+                // Visual feedback on button
+                const icon = btnElement.querySelector('i');
+                const originalClass = icon.className;
+                icon.className = 'fa-solid fa-check text-green-500';
+                setTimeout(() => {
+                    icon.className = originalClass;
+                }, 2000);
+                showToast("Đã copy đoạn này!");
+            } else {
+                showToast("Lỗi khi copy!", "error");
+            }
+        }
+
+        async function copyAll() {
+            if (generatedCaptions.length === 0) return;
+            const allText = generatedCaptions.join('\n\n'); // Separate slides by double newline
+            const success = await copyText(allText);
+            
+            if (success) {
+                showToast("Đã copy toàn bộ kịch bản!");
+            } else {
+                 showToast("Lỗi khi copy!", "error");
+            }
+        }
+
+        // UI Utility for Notifications
+        let toastTimeout;
+        function showToast(message, type = 'success') {
+            toastMessage.textContent = message;
+            
+            const icon = toast.querySelector('i');
+            if (type === 'success') {
+                icon.className = 'fa-solid fa-circle-check text-green-400 mr-2';
+                toast.classList.remove('bg-red-800');
+                toast.classList.add('bg-gray-800');
+            } else {
+                icon.className = 'fa-solid fa-circle-exclamation text-red-400 mr-2';
+                toast.classList.remove('bg-gray-800');
+                toast.classList.add('bg-red-800');
+            }
+
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+
+        // Allow pressing Enter in input fields to trigger generation
+        topicInput.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') generateCaptions();
+        });
+        countInput.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') generateCaptions();
+        });
+    </script>
+</body>
+</html>
