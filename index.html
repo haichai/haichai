@@ -7,6 +7,10 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+    <!-- THƯ VIỆN BỔ SUNG CHO TÍNH NĂNG UPLOAD HÀNG LOẠT -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 </head>
 <body class="bg-gray-50 font-sans h-screen overflow-hidden">
 
@@ -22,6 +26,7 @@
         </div>
     </div>
 
+    <!-- MODAL LỊCH SỬ THAY ĐỔI -->
     <div id="historyModal" class="fixed inset-0 bg-black bg-opacity-60 z-[60] flex items-center justify-center hidden p-4">
         <div class="bg-white w-full max-w-2xl rounded-2xl shadow-2xl flex flex-col max-h-[80vh]">
             <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl">
@@ -32,7 +37,42 @@
                 <button id="btnCloseHistory" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
             </div>
             <div id="historyList" class="overflow-y-auto p-6 space-y-4 flex-grow">
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL XÁC NHẬN UPLOAD HÀNG LOẠT -->
+    <div id="bulkModal" class="fixed inset-0 bg-black bg-opacity-60 z-[70] hidden items-center justify-center p-4 flex">
+        <div class="bg-white w-full max-w-4xl rounded-2xl shadow-2xl flex flex-col max-h-[85vh]">
+            <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl">
+                <div>
+                    <h3 class="text-xl font-bold text-gray-800">Xác nhận tạo QR hàng loạt</h3>
+                    <p class="text-sm text-gray-500 mt-1">Hệ thống sẽ lưu link và tự động tạo file ZIP chứa tất cả mã QR.</p>
                 </div>
+                <button id="btnCloseBulk" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+            </div>
+            <div class="p-6 overflow-y-auto flex-grow">
+                <div class="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded-lg mb-4 text-sm flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <span>Đã quét và phân tích được <strong id="bulkCount" class="text-lg">0</strong> mã hợp lệ từ file (Cột 1: ID, Cột 3: Link Gốc).</span>
+                </div>
+                <table class="w-full text-left text-sm border-collapse rounded-lg overflow-hidden shadow-sm">
+                    <thead class="bg-gray-100 sticky top-0 shadow-sm">
+                        <tr>
+                            <th class="p-3 border-b border-gray-200 font-semibold w-1/3">ID QR (Cột 1)</th>
+                            <th class="p-3 border-b border-gray-200 font-semibold w-2/3">Link Đích Gốc (Cột 3)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="bulkTableBody" class="divide-y divide-gray-100"></tbody>
+                </table>
+            </div>
+            <div class="p-6 border-t border-gray-100 bg-gray-50 rounded-b-2xl flex justify-end gap-3">
+                <button id="btnCancelBulk" class="px-5 py-2 rounded-xl border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 font-semibold transition">Hủy bỏ</button>
+                <button id="btnConfirmBulk" class="px-5 py-2 rounded-xl bg-blue-600 text-white font-bold hover:bg-blue-700 shadow-md transition flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    Lưu & Tải file ZIP
+                </button>
+            </div>
         </div>
     </div>
 
@@ -49,7 +89,6 @@
                     </div>
                 </div>
                 <div class="flex flex-wrap items-center gap-3">
-                    <!-- NÚT MỚI: Tạo popup giới thiệu (Nằm bên trái Copy file drive) -->
                     <a href="https://haichai.github.io/luckyspin/" target="_blank" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-3 rounded-xl font-bold shadow-md flex items-center gap-2 transition-all text-sm">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
@@ -57,7 +96,6 @@
                         Tạo popup giới thiệu
                     </a>
                     
-                    <!-- Nút cũ: Copy file drive -->
                     <a href="https://script.google.com/a/macros/starspirits.vn/s/AKfycbyf86tNLIRveUFEOBFZmS1kUrpMTHlVKSTbpDM2XudoI1zax7qGC54jZRuTiqDD0keHdQ/exec" target="_blank" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-3 rounded-xl font-bold shadow-md flex items-center gap-2 transition-all text-sm">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path>
@@ -92,9 +130,22 @@
                                 <label class="block text-xs font-bold text-green-600 uppercase mb-1">Destination Link (Link Đích)</label>
                                 <input type="text" id="qrDestInput" placeholder="https://..." class="w-full border-2 border-green-200 rounded-lg p-2 text-sm focus:border-green-500 font-mono focus:outline-none">
                             </div>
-                            <div class="flex items-center justify-between pt-2">
+                            
+                            <!-- KHU VỰC NÚT LƯU VÀ UPLOAD HÀNG LOẠT -->
+                            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between pt-2 gap-4 border-t border-blue-100 mt-4 pt-4">
                                 <p class="text-xs text-gray-400">Trỏ về: <span id="qrResultLink" class="text-blue-500 font-bold break-all">Chưa có</span></p>
-                                <button id="btnSave" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg text-sm shadow-md transition-all">Lưu Link & Cập Nhật</button>
+                                <div class="flex w-full sm:w-auto gap-2">
+                                    <!-- Nút Upload File Ẩn -->
+                                    <input type="file" id="bulkFileInput" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" class="hidden">
+                                    
+                                    <button id="btnBulkUpload" class="flex-1 sm:flex-none bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-lg text-sm shadow-md transition-all flex items-center justify-center gap-2">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                                        Upload Excel/CSV
+                                    </button>
+                                    <button id="btnSave" class="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg text-sm shadow-md transition-all">
+                                        Lưu 1 Link & Cập Nhật
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -168,7 +219,6 @@
                 </div>
             </div>
             
-            <!-- FOOTER MỚI ĐƯỢC THÊM VÀO ĐÂY -->
             <footer class="w-full text-center py-6 text-gray-400 text-sm font-medium border-t border-gray-200 mt-auto">
                 Created by quang
             </footer>
@@ -207,6 +257,7 @@
         let idChartInstance = null;
         let cityChartInstance = null;
         let allLogs = []; 
+        let bulkParsedData = []; // Mảng chứa dữ liệu upload từ file
 
         const qrCanvas = document.getElementById('qrCanvas');
         const qrIdInput = document.getElementById('qrIdInput');
@@ -236,12 +287,13 @@
                 await push(historyRef, {
                     url: oldUrl,
                     timestamp: new Date().toLocaleString('vi-VN'),
-                    savedBy: auth.currentUser.email
+                    savedBy: auth.currentUser ? auth.currentUser.email : 'Hệ thống (Upload)'
                 });
             }
             await set(currentLinkRef, newUrl);
         }
 
+        // CHỨC NĂNG LƯU LINK ĐƠN LẺ
         document.getElementById('btnSave').addEventListener('click', async () => {
             const id = qrIdInput.value.trim();
             const url = qrDestInput.value.trim();
@@ -256,7 +308,7 @@
                 qrCanvas.classList.remove('opacity-20');
                 document.getElementById('btnDownload').disabled = false;
             } catch (e) { alert("Lỗi: " + e.message); }
-            document.getElementById('btnSave').innerText = "Lưu Link & Cập Nhật";
+            document.getElementById('btnSave').innerText = "Lưu 1 Link & Cập Nhật";
         });
 
         document.getElementById('btnDownload').addEventListener('click', () => {
@@ -265,6 +317,125 @@
             link.href = qrCanvas.toDataURL('image/png');
             link.click();
         });
+
+
+        // ==========================================
+        // TÍNH NĂNG UPLOAD HÀNG LOẠT (EXCEL/CSV)
+        // ==========================================
+        const bulkFileInput = document.getElementById('bulkFileInput');
+        
+        document.getElementById('btnBulkUpload').addEventListener('click', () => bulkFileInput.click());
+
+        bulkFileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if(!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    // Dùng SheetJS đọc file
+                    const workbook = window.XLSX.read(data, {type: 'array'});
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    const json = window.XLSX.utils.sheet_to_json(worksheet, {header: 1});
+
+                    bulkParsedData = [];
+                    // Vòng lặp bỏ qua dòng đầu tiên (i = 1) vì thường là header
+                    for(let i = 1; i < json.length; i++) {
+                        const row = json[i];
+                        if(row && row.length > 0) {
+                            // Cột 1 là Tên QR (ID) - index 0
+                            const id = row[0] ? String(row[0]).trim() : '';
+                            // Cột 2 là Link sau QR - index 1 (Bỏ qua vì hệ thống tự generate)
+                            // Cột 3 là Link đích gốc - index 2
+                            const destUrl = row[2] ? String(row[2]).trim() : '';
+                            
+                            if(id && destUrl) {
+                                bulkParsedData.push({ id, url: destUrl });
+                            }
+                        }
+                    }
+
+                    if(bulkParsedData.length === 0) {
+                        alert("Không tìm thấy dữ liệu hợp lệ! Hãy đảm bảo Dòng 1 là Tiêu đề, Cột 1 chứa ID và Cột 3 chứa Link gốc.");
+                        return;
+                    }
+
+                    // Render Preview Table
+                    const tbody = document.getElementById('bulkTableBody');
+                    tbody.innerHTML = '';
+                    bulkParsedData.forEach((item, index) => {
+                        const rowHtml = `
+                            <tr class="${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-blue-50 transition">
+                                <td class="p-3 border-b border-gray-100 font-mono text-blue-600 font-bold">${item.id}</td>
+                                <td class="p-3 border-b border-gray-100 text-gray-600 max-w-xs truncate" title="${item.url}">${item.url}</td>
+                            </tr>
+                        `;
+                        tbody.insertAdjacentHTML('beforeend', rowHtml);
+                    });
+                    
+                    document.getElementById('bulkCount').innerText = bulkParsedData.length;
+                    document.getElementById('bulkModal').classList.remove('hidden');
+
+                } catch (error) {
+                    alert("Lỗi khi đọc file: " + error.message);
+                }
+            };
+            reader.readAsArrayBuffer(file);
+            this.value = ''; // Reset file input
+        });
+
+        // Đóng/Hủy Modal Bulk
+        document.getElementById('btnCloseBulk').addEventListener('click', () => document.getElementById('bulkModal').classList.add('hidden'));
+        document.getElementById('btnCancelBulk').addEventListener('click', () => document.getElementById('bulkModal').classList.add('hidden'));
+
+        // Xác nhận Upload và Tải ZIP
+        document.getElementById('btnConfirmBulk').addEventListener('click', async () => {
+            const btn = document.getElementById('btnConfirmBulk');
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = `<span class="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full"></span> Đang xử lý ${bulkParsedData.length} mã...`;
+
+            try {
+                const zip = new window.JSZip();
+                const workerDomain = document.getElementById('qrBaseUrl').value.trim();
+                const baseUrl = workerDomain.endsWith('/') ? workerDomain : workerDomain + '/';
+
+                for (let i = 0; i < bulkParsedData.length; i++) {
+                    const item = bulkParsedData[i];
+                    
+                    // 1. Lưu Dữ liệu vào Database tuần tự
+                    await saveLinkWithHistory(item.id, item.url);
+
+                    // 2. Tạo QR Base64
+                    const qrBulk = new QRious({
+                        value: baseUrl + item.id,
+                        size: 800, // Size lớn để in nét hơn
+                        background: 'white',
+                        foreground: '#1f2937'
+                    });
+                    
+                    const base64Data = qrBulk.image.src.split(',')[1];
+                    // Thêm vào file ZIP
+                    zip.file(`${item.id}.png`, base64Data, {base64: true});
+                }
+
+                // 3. Tiến hành đóng gói và tự động tải xuống ZIP
+                const content = await zip.generateAsync({type: "blob"});
+                window.saveAs(content, `HaiChai_Bulk_QR_${new Date().toISOString().split('T')[0]}.zip`);
+
+                alert(`Đã lưu thành công ${bulkParsedData.length} mã vào hệ thống và tải xuống file ZIP ảnh!`);
+                document.getElementById('bulkModal').classList.add('hidden');
+                
+            } catch (err) {
+                alert("Đã xảy ra lỗi trong quá trình xử lý: " + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        });
+
 
         // BẢNG QUẢN LÝ LINK & LỊCH SỬ
         async function showHistory(id) {
@@ -341,19 +512,15 @@
         // KHU VỰC RENDER BIỂU ĐỒ & LOG QUÉT
         // ==========================================
         
-        // HÀM PARSE DATE MỚI (Dùng Regex để bắt mọi định dạng có ngày tháng)
         function parseDateString(timeStr) {
             try {
                 if (!timeStr) return null;
-                // Regex tìm kiếm mẫu DD/MM/YYYY hoặc D/M/YYYY
                 const match = timeStr.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
                 if (!match) return null;
-                
                 const day = match[1].padStart(2, '0');
                 const month = match[2].padStart(2, '0');
                 const year = match[3];
-                
-                return `${year}-${month}-${day}`; // Trả về định dạng chuẩn YYYY-MM-DD
+                return `${year}-${month}-${day}`;
             } catch (e) { return null; }
         }
 
@@ -415,23 +582,17 @@
             });
         }
 
-        // CẬP NHẬT LOGIC LỌC
         function applyFilters() {
             const startDate = document.getElementById('filterStartDate').value;
             const endDate = document.getElementById('filterEndDate').value;
             const selectedQR = document.getElementById('filterQR').value;
 
             const filteredData = allLogs.filter(log => {
-                // 1. Lọc theo QR ID
                 if (selectedQR !== 'ALL' && log.id !== selectedQR) return false;
                 
-                // 2. Lọc theo Ngày
                 if (startDate || endDate) {
                     const logDateStr = parseDateString(log.time);
-                    
-                    // Nếu ngày chọn có thiết lập nhưng data không có ngày hợp lệ -> loại luôn
                     if (!logDateStr) return false; 
-                    
                     if (startDate && logDateStr < startDate) return false;
                     if (endDate && logDateStr > endDate) return false;
                 }
