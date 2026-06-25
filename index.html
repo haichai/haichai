@@ -3,235 +3,429 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Haichai QR Dashboard - Pro Version</title>
+    <title>Haichai QR Dashboard - Soft Pro</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Scripts -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
-    <!-- THƯ VIỆN BỔ SUNG CHO TÍNH NĂNG UPLOAD HÀNG LOẠT -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
-</head>
-<body class="bg-gray-50 font-sans h-screen overflow-hidden">
 
-    <div id="loginScreen" class="fixed inset-0 bg-gray-900 bg-opacity-50 backdrop-blur-sm z-50 flex items-center justify-center">
-        <div class="bg-white p-8 rounded-2xl shadow-2xl max-w-md w-full text-center">
-            <h2 class="text-2xl font-bold text-gray-800 mb-2">Hệ Thống Nội Bộ haichai</h2>
-            <p class="text-gray-500 mb-6 text-sm">Xác thực quyền quản trị @starspirits.vn</p>
-            <button id="btnLogin" class="w-full flex items-center justify-center gap-3 bg-white border border-gray-300 text-gray-700 font-semibold py-3 px-4 rounded-xl hover:bg-gray-50 transition shadow-sm">
-                <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-5 h-5">
-                Đăng nhập bằng Google
+    <!-- Tailwind Config for Design System -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        soft: {
+                            page: '#edf2f8',
+                            main: '#ffffff',
+                            sidebar: '#f5f7fb',
+                            primary: '#2f80ed',
+                            'primary-light': '#dcecff',
+                            success: '#2ecc71',
+                            'success-light': '#dff7ea',
+                            text: '#203040',
+                            muted: '#8a96a8',
+                            border: '#edf0f5',
+                        }
+                    },
+                    boxShadow: {
+                        'soft-main': '0 18px 45px rgba(44, 62, 80, 0.12)',
+                        'soft-card': '0 8px 24px rgba(44, 62, 80, 0.04)',
+                    },
+                    borderRadius: {
+                        '4xl': '34px',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+        
+        .soft-card {
+            background: #ffffff;
+            border: 1px solid #edf0f5;
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(44, 62, 80, 0.04);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .soft-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 28px rgba(44, 62, 80, 0.08);
+        }
+    </style>
+</head>
+<body class="bg-soft-page font-sans h-screen flex items-center justify-center text-soft-text overflow-hidden p-4 lg:p-6">
+
+    <!-- LOGIN SCREEN -->
+    <div id="loginScreen" class="fixed inset-0 bg-soft-page bg-opacity-80 backdrop-blur-md z-50 flex items-center justify-center transition-all duration-300">
+        <div class="bg-white p-10 rounded-[34px] shadow-soft-main max-w-md w-full text-center border border-soft-border">
+            <div class="w-16 h-16 bg-soft-primary-light rounded-full flex items-center justify-center mx-auto mb-6 text-soft-primary">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+            </div>
+            <h2 class="text-2xl font-bold text-soft-text mb-2">Hệ Thống haichai</h2>
+            <p class="text-soft-muted mb-8 text-sm">Xác thực quyền quản trị nội bộ</p>
+            <button id="btnLogin" class="w-full flex items-center justify-center gap-3 bg-white border border-soft-border text-soft-text font-semibold py-3 px-4 rounded-xl hover:bg-gray-50 hover:shadow-soft-card transition-all">
+                <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-5 h-5" alt="Google">
+                Tiếp tục với Google
             </button>
             <p id="loginError" class="text-red-500 text-sm mt-4 hidden font-medium"></p>
         </div>
     </div>
 
-    <!-- MODAL LỊCH SỬ THAY ĐỔI -->
-    <div id="historyModal" class="fixed inset-0 bg-black bg-opacity-60 z-[60] flex items-center justify-center hidden p-4">
-        <div class="bg-white w-full max-w-2xl rounded-2xl shadow-2xl flex flex-col max-h-[80vh]">
-            <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl">
-                <div>
-                    <h3 class="text-xl font-bold text-gray-800">Lịch sử thay đổi</h3>
-                    <p id="historyTargetId" class="text-blue-600 font-mono text-sm font-bold"></p>
+    <!-- MAIN DASHBOARD SHELL -->
+    <div id="mainDashboard" class="w-full max-w-[1440px] h-[95vh] bg-white rounded-[34px] shadow-soft-main flex overflow-hidden hidden relative">
+        
+        <!-- SIDEBAR -->
+        <aside class="w-[200px] bg-soft-sidebar flex flex-col justify-between py-8 px-6 border-r border-soft-border hidden md:flex shrink-0">
+            <div>
+                <!-- Logo area -->
+                <div class="flex items-center gap-3 mb-12 px-2">
+                    <div class="w-8 h-8 bg-soft-primary rounded-lg flex items-center justify-center text-white font-bold text-lg">H</div>
+                    <span class="font-bold text-lg text-soft-text tracking-tight">haichai.</span>
                 </div>
-                <button id="btnCloseHistory" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
-            </div>
-            <div id="historyList" class="overflow-y-auto p-6 space-y-4 flex-grow">
-            </div>
-        </div>
-    </div>
 
-    <!-- MODAL XÁC NHẬN UPLOAD HÀNG LOẠT -->
-    <div id="bulkModal" class="fixed inset-0 bg-black bg-opacity-60 z-[70] hidden items-center justify-center p-4 flex">
-        <div class="bg-white w-full max-w-4xl rounded-2xl shadow-2xl flex flex-col max-h-[85vh]">
-            <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl">
-                <div>
-                    <h3 class="text-xl font-bold text-gray-800">Xác nhận tạo QR hàng loạt</h3>
-                    <p class="text-sm text-gray-500 mt-1">Hệ thống sẽ lưu link và tự động tạo file ZIP chứa tất cả mã QR.</p>
-                </div>
-                <button id="btnCloseBulk" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
-            </div>
-            <div class="p-6 overflow-y-auto flex-grow">
-                <div class="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded-lg mb-4 text-sm flex items-center gap-2">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    <span>Đã quét và phân tích được <strong id="bulkCount" class="text-lg">0</strong> mã hợp lệ từ file (Cột 1: ID, Cột 3: Link Gốc).</span>
-                </div>
-                <table class="w-full text-left text-sm border-collapse rounded-lg overflow-hidden shadow-sm">
-                    <thead class="bg-gray-100 sticky top-0 shadow-sm">
-                        <tr>
-                            <th class="p-3 border-b border-gray-200 font-semibold w-1/3">ID QR (Cột 1)</th>
-                            <th class="p-3 border-b border-gray-200 font-semibold w-2/3">Link Đích Gốc (Cột 3)</th>
-                        </tr>
-                    </thead>
-                    <tbody id="bulkTableBody" class="divide-y divide-gray-100"></tbody>
-                </table>
-            </div>
-            <div class="p-6 border-t border-gray-100 bg-gray-50 rounded-b-2xl flex justify-end gap-3">
-                <button id="btnCancelBulk" class="px-5 py-2 rounded-xl border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 font-semibold transition">Hủy bỏ</button>
-                <button id="btnConfirmBulk" class="px-5 py-2 rounded-xl bg-blue-600 text-white font-bold hover:bg-blue-700 shadow-md transition flex items-center gap-2">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                    Lưu & Tải file ZIP
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <div id="mainDashboard" class="h-full overflow-y-auto hidden p-6 flex flex-col">
-        <div class="max-w-7xl mx-auto flex-grow w-full">
-            
-            <div class="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <div>
-                    <h1 class="text-3xl font-bold text-gray-800">haichai Dashboard</h1>
-                    <div class="flex items-center gap-2 mt-1">
-                        <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                        <p id="userInfo" class="text-sm font-semibold text-gray-600">Đang tải...</p>
-                        <button id="btnLogOut" class="text-xs text-red-500 hover:text-red-700 underline ml-2">Đăng xuất</button>
-                    </div>
-                </div>
-                <div class="flex flex-wrap items-center gap-3">
-                    <a href="https://haichai.github.io/luckyspin/" target="_blank" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-3 rounded-xl font-bold shadow-md flex items-center gap-2 transition-all text-sm">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
-                        </svg>
-                        Tạo popup giới thiệu
+                <!-- Navigation -->
+                <nav class="space-y-2">
+                    <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-soft-primary bg-white shadow-sm font-semibold text-sm transition-all">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+                        Dashboard
                     </a>
-                    
-                    <a href="https://script.google.com/a/macros/starspirits.vn/s/AKfycbyf86tNLIRveUFEOBFZmS1kUrpMTHlVKSTbpDM2XudoI1zax7qGC54jZRuTiqDD0keHdQ/exec" target="_blank" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-3 rounded-xl font-bold shadow-md flex items-center gap-2 transition-all text-sm">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path>
-                        </svg>
-                        Copy file drive
+                    <a href="#qrFormSection" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-soft-muted hover:text-soft-text hover:bg-gray-100 font-medium text-sm transition-all">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+                        QR Manager
                     </a>
-                    
-                    <div class="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold shadow-lg flex items-center gap-2">
-                        <span>Tổng lượt quét:</span>
-                        <span id="totalScans" class="text-3xl">0</span>
-                    </div>
-                </div>
+                    <a href="#chartSection" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-soft-muted hover:text-soft-text hover:bg-gray-100 font-medium text-sm transition-all">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                        Analytics
+                    </a>
+                </nav>
             </div>
 
-            <div class="bg-white rounded-xl shadow-sm border border-blue-200 mb-8 overflow-hidden">
-                <div class="flex flex-col md:flex-row border-b border-gray-100">
-                    <div class="p-6 flex-1 bg-blue-50/40" id="qrFormSection">
-                        <h2 class="text-xl font-bold text-gray-800 mb-1">Tạo & Sửa QR Động</h2>
-                        <p class="text-sm text-gray-500 mb-6 italic">Mọi thay đổi link sẽ được hệ thống lưu lại nhật ký để khôi phục khi cần.</p>
-                        <div class="space-y-4">
-                            <div class="flex gap-4">
-                                <div class="w-1/3">
-                                    <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Worker Domain</label>
-                                    <input type="text" id="qrBaseUrl" value="https://store.haichai.workers.dev/" class="w-full border border-gray-300 rounded-lg p-2.5 text-xs bg-gray-100 text-gray-500" disabled>
-                                </div>
-                                <div class="w-2/3">
-                                    <label class="block text-xs font-bold text-blue-600 uppercase mb-1">ID (VD: menu_oceanpark)</label>
-                                    <input type="text" id="qrIdInput" class="w-full border-2 border-blue-200 rounded-lg p-2 text-sm focus:border-blue-500 font-mono focus:outline-none">
-                                </div>
+            <!-- User / Logout -->
+            <div class="mt-auto pt-6 border-t border-soft-border/50">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2 overflow-hidden">
+                        <div class="w-8 h-8 rounded-full bg-soft-primary-light flex items-center justify-center shrink-0">
+                            <svg class="w-4 h-4 text-soft-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                        </div>
+                        <div class="truncate">
+                            <p id="userInfo" class="text-[11px] font-semibold text-soft-text truncate">Admin</p>
+                            <div class="flex items-center gap-1.5">
+                                <span class="w-1.5 h-1.5 rounded-full bg-soft-success"></span>
+                                <span class="text-[10px] text-soft-muted">Online</span>
                             </div>
+                        </div>
+                    </div>
+                    <button id="btnLogOut" class="text-soft-muted hover:text-red-500 transition p-1" title="Đăng xuất">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- CONTENT AREA -->
+        <main class="flex-1 flex flex-col h-full bg-white overflow-hidden relative">
+            
+            <!-- Header -->
+            <header class="h-[80px] px-8 flex items-center justify-between shrink-0 bg-white/80 backdrop-blur-sm z-10">
+                <div class="flex items-center gap-3">
+                    <button class="md:hidden text-soft-muted"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg></button>
+                    <div>
+                        <h1 class="text-xl font-bold text-soft-text">Overview</h1>
+                        <p class="text-[11px] text-soft-muted font-medium" id="headerDate">System Analytics</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-4">
+                    <!-- Quick Actions -->
+                    <div class="hidden sm:flex items-center gap-2 mr-4 border-r border-soft-border pr-6">
+                        <a href="https://haichai.github.io/luckyspin/" target="_blank" class="text-xs font-semibold text-soft-muted hover:text-soft-primary flex items-center gap-1.5 transition">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+                            Tạo Popup
+                        </a>
+                        <a href="https://script.google.com/a/macros/starspirits.vn/s/AKfycbyf86tNLIRveUFEOBFZmS1kUrpMTHlVKSTbpDM2XudoI1zax7qGC54jZRuTiqDD0keHdQ/exec" target="_blank" class="text-xs font-semibold text-soft-muted hover:text-soft-primary flex items-center gap-1.5 transition ml-3">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path></svg>
+                            Copy Drive
+                        </a>
+                    </div>
+                    
+                    <div class="relative">
+                        <svg class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-soft-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        <input type="text" id="searchLinkInput" placeholder="Tìm ID hoặc Link..." class="pl-9 pr-4 py-2 bg-soft-page rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-soft-primary/20 transition-all w-48 sm:w-64 border-none text-soft-text placeholder:text-soft-muted">
+                    </div>
+                </div>
+            </header>
+
+            <!-- Scrollable Content -->
+            <div class="flex-1 overflow-y-auto px-6 lg:px-8 pb-12 pt-4">
+                
+                <!-- Stat Cards Row -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+                    <!-- Total Scans Card -->
+                    <div class="soft-card p-5 relative overflow-hidden group">
+                        <div class="flex justify-between items-start mb-4">
+                            <span class="text-[11px] font-bold text-soft-muted uppercase tracking-wider">Total Scans</span>
+                            <div class="p-1.5 bg-soft-primary-light text-soft-primary rounded-lg"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg></div>
+                        </div>
+                        <div class="flex items-end gap-3">
+                            <h3 id="totalScans" class="text-4xl font-bold text-soft-text leading-none">0</h3>
+                            <span class="text-xs font-semibold text-soft-success mb-1 flex items-center"><svg class="w-3 h-3 mr-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg> All time</span>
+                        </div>
+                        <!-- Decorative background chart -->
+                        <svg class="absolute -bottom-2 -right-2 w-24 h-24 text-soft-primary/5 group-hover:text-soft-primary/10 transition" viewBox="0 0 100 100" fill="currentColor"><circle cx="50" cy="50" r="40"></circle></svg>
+                    </div>
+
+                    <!-- Dummy Card 2 -->
+                    <div class="soft-card p-5 relative overflow-hidden">
+                        <div class="flex justify-between items-start mb-4">
+                            <span class="text-[11px] font-bold text-soft-muted uppercase tracking-wider">Active Links</span>
+                            <div class="p-1.5 bg-soft-success-light text-soft-success rounded-lg"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101"></path></svg></div>
+                        </div>
+                        <div class="flex items-end gap-3">
+                            <h3 id="totalLinksStat" class="text-4xl font-bold text-soft-text leading-none">0</h3>
+                            <span class="text-xs font-semibold text-soft-success mb-1">Generated</span>
+                        </div>
+                    </div>
+
+                    <!-- Actions Card (Combined upload/create) -->
+                    <div class="soft-card p-5 lg:col-span-2 flex flex-col justify-center bg-gradient-to-br from-soft-primary to-blue-600 border-none text-white shadow-lg shadow-soft-primary/20">
+                        <div class="flex justify-between items-center">
                             <div>
-                                <label class="block text-xs font-bold text-green-600 uppercase mb-1">Destination Link (Link Đích)</label>
-                                <input type="text" id="qrDestInput" placeholder="https://..." class="w-full border-2 border-green-200 rounded-lg p-2 text-sm focus:border-green-500 font-mono focus:outline-none">
+                                <h3 class="text-lg font-bold mb-1">Quản lý mã QR Hàng Loạt</h3>
+                                <p class="text-blue-100 text-xs mb-4">Tải lên file Excel/CSV để tạo hàng trăm mã QR cùng lúc và nhận file ZIP.</p>
+                            </div>
+                            <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                            </div>
+                        </div>
+                        <input type="file" id="bulkFileInput" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" class="hidden">
+                        <button id="btnBulkUpload" class="bg-white text-soft-primary hover:bg-gray-50 font-bold py-2.5 px-6 rounded-xl text-sm shadow-sm transition-all self-start flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                            Upload Excel / CSV
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Main Content Grid -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                    
+                    <!-- Left Column: Generator & Links -->
+                    <div class="lg:col-span-2 space-y-6">
+                        
+                        <!-- QR Generator Card -->
+                        <div class="soft-card" id="qrFormSection">
+                            <div class="p-5 border-b border-soft-border flex justify-between items-center bg-gray-50/50 rounded-t-2xl">
+                                <div>
+                                    <h2 class="text-base font-bold text-soft-text">Tạo & Sửa QR Đơn</h2>
+                                    <p class="text-[11px] text-soft-muted">Hỗ trợ lưu trữ version history.</p>
+                                </div>
+                                <div class="bg-soft-success-light text-soft-success text-[10px] font-bold px-2 py-1 rounded-md">Live Sync</div>
                             </div>
                             
-                            <!-- KHU VỰC NÚT LƯU VÀ UPLOAD HÀNG LOẠT -->
-                            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between pt-2 gap-4 border-t border-blue-100 mt-4 pt-4">
-                                <p class="text-xs text-gray-400">Trỏ về: <span id="qrResultLink" class="text-blue-500 font-bold break-all">Chưa có</span></p>
-                                <div class="flex w-full sm:w-auto gap-2">
-                                    <!-- Nút Upload File Ẩn -->
-                                    <input type="file" id="bulkFileInput" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" class="hidden">
+                            <div class="p-6 flex flex-col md:flex-row gap-8">
+                                <!-- Inputs -->
+                                <div class="flex-1 space-y-4">
+                                    <div class="flex gap-3">
+                                        <div class="w-1/3">
+                                            <label class="block text-[10px] font-bold text-soft-muted uppercase mb-1.5">Worker Domain</label>
+                                            <input type="text" id="qrBaseUrl" value="https://store.haichai.workers.dev/" class="w-full border border-soft-border rounded-xl p-2.5 text-xs bg-soft-page text-soft-muted focus:outline-none" disabled>
+                                        </div>
+                                        <div class="w-2/3">
+                                            <label class="block text-[10px] font-bold text-soft-primary uppercase mb-1.5">ID Định Danh</label>
+                                            <input type="text" id="qrIdInput" placeholder="VD: menu_oceanpark" class="w-full border border-soft-border rounded-xl p-2.5 text-sm focus:border-soft-primary focus:ring-1 focus:ring-soft-primary font-mono outline-none transition bg-gray-50 focus:bg-white">
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-soft-success uppercase mb-1.5">Link Đích (Destination)</label>
+                                        <input type="text" id="qrDestInput" placeholder="https://..." class="w-full border border-soft-border rounded-xl p-2.5 text-sm focus:border-soft-success focus:ring-1 focus:ring-soft-success font-mono outline-none transition bg-gray-50 focus:bg-white">
+                                    </div>
                                     
-                                    <button id="btnBulkUpload" class="flex-1 sm:flex-none bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-lg text-sm shadow-md transition-all flex items-center justify-center gap-2">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
-                                        Upload Excel/CSV
-                                    </button>
-                                    <button id="btnSave" class="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg text-sm shadow-md transition-all">
-                                        Lưu 1 Link & Cập Nhật
+                                    <div class="pt-2">
+                                        <p class="text-[11px] text-soft-muted mb-3">Result: <span id="qrResultLink" class="text-soft-primary font-mono bg-soft-primary-light/50 px-1.5 py-0.5 rounded ml-1">Chưa có</span></p>
+                                        <button id="btnSave" class="w-full sm:w-auto bg-soft-primary hover:bg-blue-600 text-white font-semibold py-2.5 px-6 rounded-xl text-sm shadow-[0_4px_14px_0_rgba(47,128,237,0.39)] hover:shadow-[0_6px_20px_rgba(47,128,237,0.23)] transition-all">
+                                            Lưu Cập Nhật
+                                        </button>
+                                        <p id="saveStatus" class="text-soft-success text-xs font-bold inline-block ml-3"></p>
+                                    </div>
+                                </div>
+                                
+                                <!-- Preview -->
+                                <div class="w-full md:w-40 flex flex-col items-center justify-center border-l border-soft-border pl-0 md:pl-8">
+                                    <div class="bg-white p-2 border border-soft-border rounded-2xl shadow-sm mb-4">
+                                        <canvas id="qrCanvas" class="opacity-30 transition-opacity w-32 h-32 rounded-xl"></canvas>
+                                    </div>
+                                    <button id="btnDownload" class="w-full bg-soft-page hover:bg-gray-200 text-soft-text font-semibold py-2 rounded-xl text-xs disabled:opacity-50 transition border border-soft-border" disabled>
+                                        Tải PNG
                                     </button>
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Links Table Card -->
+                        <div class="soft-card overflow-hidden flex flex-col h-[400px]">
+                            <div class="p-5 border-b border-soft-border flex justify-between items-center bg-gray-50/50">
+                                <h2 class="text-base font-bold text-soft-text">Danh sách Link Quản Lý</h2>
+                            </div>
+                            <div class="flex-1 overflow-auto">
+                                <table class="w-full text-left text-sm border-collapse">
+                                    <thead class="bg-white sticky top-0 z-10 shadow-sm">
+                                        <tr class="text-[11px] text-soft-muted uppercase tracking-wider">
+                                            <th class="p-4 font-semibold w-1/4">ID</th>
+                                            <th class="p-4 font-semibold w-2/4">Link Đích</th>
+                                            <th class="p-4 font-semibold text-center w-1/4">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="linksTableBody" class="divide-y divide-soft-border bg-white">
+                                        <!-- Rendered via JS -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
-                    <div class="p-6 md:w-1/3 flex flex-col items-center justify-center bg-white border-l border-gray-100">
-                        <div class="bg-white p-2 border border-gray-200 rounded-xl mb-4"><canvas id="qrCanvas" class="opacity-20 transition-opacity"></canvas></div>
-                        <button id="btnDownload" class="w-full bg-gray-800 text-white font-semibold py-2 rounded-lg text-sm disabled:opacity-50" disabled>Tải ảnh QR (PNG)</button>
-                        <p id="saveStatus" class="text-green-600 text-xs font-bold mt-2"></p>
+
+                    <!-- Right Column: Analytics & Filters -->
+                    <div class="space-y-6" id="chartSection">
+                        
+                        <!-- Filter Card -->
+                        <div class="soft-card p-5">
+                            <h3 class="text-[11px] font-bold text-soft-muted uppercase mb-4 tracking-wider flex items-center gap-2">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
+                                Data Filter
+                            </h3>
+                            <div class="space-y-3 mb-4">
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="text-[10px] text-soft-muted mb-1 block font-medium">Từ ngày</label>
+                                        <input type="date" id="filterStartDate" class="w-full border border-soft-border rounded-lg p-1.5 text-xs focus:outline-none focus:border-soft-primary bg-soft-page text-soft-text">
+                                    </div>
+                                    <div>
+                                        <label class="text-[10px] text-soft-muted mb-1 block font-medium">Đến ngày</label>
+                                        <input type="date" id="filterEndDate" class="w-full border border-soft-border rounded-lg p-1.5 text-xs focus:outline-none focus:border-soft-primary bg-soft-page text-soft-text">
+                                    </div>
+                                </div>
+                                <div>
+                                    <select id="filterQR" class="w-full border border-soft-border rounded-lg p-2 text-xs focus:outline-none focus:border-soft-primary bg-soft-page text-soft-text appearance-none">
+                                        <option value="ALL">-- Tất cả ID --</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="flex gap-2">
+                                <button id="btnApplyFilter" class="flex-1 bg-soft-text hover:bg-gray-800 text-white py-2 rounded-lg text-xs font-semibold transition">Áp dụng</button>
+                                <button id="btnClearFilter" class="flex-1 bg-gray-100 hover:bg-gray-200 text-soft-text py-2 rounded-lg text-xs font-semibold transition">Xóa lọc</button>
+                            </div>
+                        </div>
+
+                        <!-- ID Chart -->
+                        <div class="soft-card p-5 flex flex-col">
+                            <h2 class="text-sm font-bold mb-4 text-soft-text">Quét theo Cơ sở</h2>
+                            <div class="relative h-48 w-full"><canvas id="idChart"></canvas></div>
+                        </div>
+
+                        <!-- City Chart -->
+                        <div class="soft-card p-5 flex flex-col">
+                            <h2 class="text-sm font-bold mb-4 text-soft-text">Phân bổ Thành phố</h2>
+                            <div class="relative h-48 w-full flex justify-center"><canvas id="cityChart"></canvas></div>
+                        </div>
                     </div>
                 </div>
 
-               <div class="p-6">
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
-        <h3 class="text-xs font-bold text-gray-500 uppercase tracking-widest">Danh sách Link & QR đang chạy</h3>
-        <input type="text" id="searchLinkInput" placeholder="🔍 Tìm nhanh ID hoặc Link..." class="border border-gray-300 rounded-lg p-2 text-sm focus:outline-none focus:border-blue-500 w-full sm:w-1/3 shadow-sm">
+                <!-- Bottom Row: Activity Logs -->
+                <div class="soft-card overflow-hidden flex flex-col h-[350px]">
+                    <div class="p-5 border-b border-soft-border flex justify-between items-center bg-gray-50/50">
+                        <h2 class="text-base font-bold text-soft-text">Nhật ký truy cập (Live)</h2>
+                        <span id="showingCount" class="text-xs text-soft-muted bg-white px-2 py-1 rounded border border-soft-border">Đang hiển thị: 0</span>
+                    </div>
+                    <div class="flex-1 overflow-auto">
+                        <table class="w-full text-left text-sm border-collapse">
+                            <thead class="bg-white sticky top-0 shadow-sm z-10">
+                                <tr class="text-[11px] text-soft-muted uppercase tracking-wider">
+                                    <th class="p-4 font-semibold">Thời gian</th>
+                                    <th class="p-4 font-semibold">Mã ID</th>
+                                    <th class="p-4 font-semibold">Vị trí</th>
+                                    <th class="p-4 font-semibold">Thiết bị</th>
+                                </tr>
+                            </thead>
+                            <tbody id="logTableBody" class="divide-y divide-soft-border bg-white text-xs">
+                                <!-- Rendered via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <footer class="w-full text-center py-8 text-soft-muted text-xs">
+                    Soft Analytics Dashboard UI • haichai
+                </footer>
+            </div>
+        </main>
     </div>
 
-    <div class="overflow-y-auto max-h-[500px] border border-gray-100 rounded-xl">
-        <table class="w-full text-left text-sm">
-            <thead class="bg-gray-50 sticky top-0">
-                <tr class="text-gray-500">
-                    <th class="p-4 border-b w-1/4">ID</th>
-                    <th class="p-4 border-b w-2/4">Link Đích</th>
-                    <th class="p-4 border-b text-center w-1/4">Công cụ</th>
-                </tr>
-            </thead>
-            <tbody id="linksTableBody"></tbody>
-        </table>
+    <!-- MODALS -->
+    <!-- Modal Lịch sử -->
+    <div id="historyModal" class="fixed inset-0 bg-soft-text/20 backdrop-blur-sm z-[60] flex items-center justify-center hidden p-4 transition-all">
+        <div class="bg-white w-full max-w-lg rounded-[24px] shadow-soft-main flex flex-col max-h-[80vh] border border-soft-border overflow-hidden">
+            <div class="p-6 border-b border-soft-border flex justify-between items-center bg-gray-50/50">
+                <div>
+                    <h3 class="text-lg font-bold text-soft-text">Version History</h3>
+                    <p id="historyTargetId" class="text-soft-primary font-mono text-xs font-semibold mt-1 bg-soft-primary-light/50 inline-block px-2 py-0.5 rounded"></p>
+                </div>
+                <button id="btnCloseHistory" class="text-soft-muted hover:text-soft-text text-xl p-1 rounded-lg hover:bg-gray-100 transition">&times;</button>
+            </div>
+            <div id="historyList" class="overflow-y-auto p-6 space-y-3 flex-grow bg-white">
+            </div>
+        </div>
     </div>
-</div>
 
-            <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 mb-8 flex flex-wrap items-end gap-4">
-                <div class="flex flex-col">
-                    <label class="text-xs text-gray-500 mb-1 font-semibold uppercase">Từ ngày</label>
-                    <input type="date" id="filterStartDate" class="border border-gray-300 rounded-lg p-2 text-sm focus:outline-none focus:border-blue-500">
+    <!-- Modal Bulk Upload -->
+    <div id="bulkModal" class="fixed inset-0 bg-soft-text/20 backdrop-blur-sm z-[70] hidden items-center justify-center p-4 flex transition-all">
+        <div class="bg-white w-full max-w-3xl rounded-[24px] shadow-soft-main flex flex-col max-h-[85vh] border border-soft-border overflow-hidden">
+            <div class="p-6 border-b border-soft-border flex justify-between items-center bg-gray-50/50">
+                <div>
+                    <h3 class="text-lg font-bold text-soft-text">Xác nhận tạo QR hàng loạt</h3>
+                    <p class="text-xs text-soft-muted mt-1">Hệ thống sẽ lưu link và tự động đóng gói file ZIP.</p>
                 </div>
-                <div class="flex flex-col">
-                    <label class="text-xs text-gray-500 mb-1 font-semibold uppercase">Đến ngày</label>
-                    <input type="date" id="filterEndDate" class="border border-gray-300 rounded-lg p-2 text-sm focus:outline-none focus:border-blue-500">
-                </div>
-                <div class="flex flex-col min-w-[200px]">
-                    <label class="text-xs text-gray-500 mb-1 font-semibold uppercase">Lọc theo mã QR</label>
-                    <select id="filterQR" class="border border-gray-300 rounded-lg p-2 text-sm focus:outline-none focus:border-blue-500">
-                        <option value="ALL">-- Tất cả mã QR --</option>
-                    </select>
-                </div>
-                <div class="flex gap-2">
-                    <button id="btnApplyFilter" class="bg-gray-800 hover:bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-semibold transition">Lọc Dữ Liệu</button>
-                    <button id="btnClearFilter" class="bg-red-50 hover:bg-red-100 text-red-600 px-4 py-2 rounded-lg text-sm font-semibold transition">Xóa Lọc</button>
-                </div>
+                <button id="btnCloseBulk" class="text-soft-muted hover:text-soft-text text-xl p-1 rounded-lg hover:bg-gray-100 transition">&times;</button>
             </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 flex flex-col">
-                    <h2 class="font-bold mb-4 text-gray-700">Lượt quét theo ID (Cơ sở)</h2>
-                    <div class="relative h-72 w-full"><canvas id="idChart"></canvas></div>
+            <div class="p-6 overflow-y-auto flex-grow bg-white">
+                <div class="bg-soft-primary-light/40 border border-soft-primary/20 text-soft-primary px-4 py-3 rounded-xl mb-4 text-sm flex items-center gap-3">
+                    <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <span>Quét thành công <strong id="bulkCount" class="text-base">0</strong> mã hợp lệ từ file Excel/CSV.</span>
                 </div>
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 flex flex-col">
-                    <h2 class="font-bold mb-4 text-gray-700">Lượt quét theo Thành phố</h2>
-                    <div class="relative h-72 w-full flex justify-center"><canvas id="cityChart"></canvas></div>
-                </div>
-            </div>
-
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-12">
-                <div class="p-6 border-b border-gray-100 flex justify-between items-center">
-                    <h2 class="font-bold text-gray-700">Chi tiết lượt quét (100 lượt gần nhất)</h2>
-                    <span id="showingCount" class="text-sm text-gray-500">Đang hiển thị: 0</span>
-                </div>
-                <div class="overflow-x-auto max-h-[500px]">
-                    <table class="w-full text-left border-collapse">
-                        <thead class="sticky top-0 bg-gray-50 shadow-sm">
-                            <tr class="text-gray-600 text-sm">
-                                <th class="p-4 border-b font-semibold">Thời gian</th>
-                                <th class="p-4 border-b font-semibold">Mã ID</th>
-                                <th class="p-4 border-b font-semibold">Thành phố</th>
-                                <th class="p-4 border-b font-semibold">Thiết bị</th>
+                <div class="border border-soft-border rounded-xl overflow-hidden">
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead class="bg-gray-50 sticky top-0 shadow-sm">
+                            <tr class="text-[11px] text-soft-muted uppercase tracking-wider">
+                                <th class="p-3 font-semibold w-1/3">ID QR (Cột 1)</th>
+                                <th class="p-3 font-semibold w-2/3">Link Đích (Cột 3)</th>
                             </tr>
                         </thead>
-                        <tbody id="logTableBody" class="text-sm"></tbody>
+                        <tbody id="bulkTableBody" class="divide-y divide-soft-border"></tbody>
                     </table>
                 </div>
             </div>
-            
-            <footer class="w-full text-center py-6 text-gray-400 text-sm font-medium border-t border-gray-200 mt-auto">
-                Created by quang
-            </footer>
-
+            <div class="p-5 border-t border-soft-border bg-gray-50/50 flex justify-end gap-3">
+                <button id="btnCancelBulk" class="px-5 py-2 rounded-xl border border-soft-border bg-white text-soft-text hover:bg-gray-50 font-semibold text-sm transition">Hủy bỏ</button>
+                <button id="btnConfirmBulk" class="px-5 py-2 rounded-xl bg-soft-primary text-white font-bold hover:bg-blue-600 shadow-md shadow-soft-primary/30 transition flex items-center gap-2 text-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    Xử lý & Tải ZIP
+                </button>
+            </div>
         </div>
     </div>
 
@@ -240,9 +434,6 @@
         import { getDatabase, ref, onValue, set, push, get } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
 
-        // ==========================================
-        // KHAI BÁO DANH SÁCH EMAIL NGOẠI LỆ Ở ĐÂY
-        // ==========================================
         const VIP_EMAILS = [
             'ngocanhn1410@gmail.com',
             'thuctapsinh2@gmail.com'
@@ -266,17 +457,28 @@
         let idChartInstance = null;
         let cityChartInstance = null;
         let allLogs = []; 
-        let bulkParsedData = []; // Mảng chứa dữ liệu upload từ file
-        let currentLinksData = null; // Biến lưu trữ data để tìm kiếm
+        let bulkParsedData = []; 
+        let currentLinksData = null; 
+
+        // Set Header Date
+        const today = new Date();
+        document.getElementById('headerDate').innerText = today.toLocaleDateString('en-US', { month: 'long', day: 'numeric', weekday: 'short' }).toUpperCase();
+
+        // Chart.js Default Config for "Soft UI" Look
+        Chart.defaults.font.family = 'Inter, sans-serif';
+        Chart.defaults.color = '#8a96a8';
+        Chart.defaults.scale.grid.display = false; // Hide grid lines
+        Chart.defaults.plugins.tooltip.backgroundColor = '#203040';
+        Chart.defaults.plugins.tooltip.padding = 10;
+        Chart.defaults.plugins.tooltip.cornerRadius = 8;
 
         const qrCanvas = document.getElementById('qrCanvas');
         const qrIdInput = document.getElementById('qrIdInput');
         const qrDestInput = document.getElementById('qrDestInput');
         const qrBaseUrlInput = document.getElementById('qrBaseUrl');
         
-        const qr = new QRious({ element: qrCanvas, size: 200, background: 'white', foreground: '#1f2937' });
+        const qr = new QRious({ element: qrCanvas, size: 200, background: 'white', foreground: '#2f80ed' }); // Use primary color for QR
 
-        // TẠO & SỬA MÃ QR ĐỘNG + VERSION CONTROL
         function updateQRPreview() {
             let baseUrl = qrBaseUrlInput.value.trim();
             let id = qrIdInput.value.trim();
@@ -297,28 +499,28 @@
                 await push(historyRef, {
                     url: oldUrl,
                     timestamp: new Date().toLocaleString('vi-VN'),
-                    savedBy: auth.currentUser ? auth.currentUser.email : 'Hệ thống (Upload)'
+                    savedBy: auth.currentUser ? auth.currentUser.email : 'System'
                 });
             }
             await set(currentLinkRef, newUrl);
         }
 
-        // CHỨC NĂNG LƯU LINK ĐƠN LẺ
         document.getElementById('btnSave').addEventListener('click', async () => {
             const id = qrIdInput.value.trim();
             const url = qrDestInput.value.trim();
-            if (!id || !url) return alert("Nhập đủ ID và Link sếp ơi!");
+            if (!id || !url) return alert("Vui lòng nhập ID và Link đích.");
             
-            document.getElementById('btnSave').innerText = "Đang xử lý...";
+            const btn = document.getElementById('btnSave');
+            btn.innerText = "Đang xử lý...";
             try {
                 await saveLinkWithHistory(id, url);
-                document.getElementById('saveStatus').innerText = "✓ Đã lưu link!";
-                setTimeout(() => document.getElementById('saveStatus').innerText = "", 4000);
+                document.getElementById('saveStatus').innerText = "✓ Saved";
+                setTimeout(() => document.getElementById('saveStatus').innerText = "", 3000);
                 updateQRPreview();
-                qrCanvas.classList.remove('opacity-20');
+                qrCanvas.classList.remove('opacity-30');
                 document.getElementById('btnDownload').disabled = false;
             } catch (e) { alert("Lỗi: " + e.message); }
-            document.getElementById('btnSave').innerText = "Lưu 1 Link & Cập Nhật";
+            btn.innerText = "Lưu Cập Nhật";
         });
 
         document.getElementById('btnDownload').addEventListener('click', () => {
@@ -328,12 +530,8 @@
             link.click();
         });
 
-
-        // ==========================================
-        // TÍNH NĂNG UPLOAD HÀNG LOẠT (EXCEL/CSV)
-        // ==========================================
+        // Bulk Upload Logic
         const bulkFileInput = document.getElementById('bulkFileInput');
-        
         document.getElementById('btnBulkUpload').addEventListener('click', () => bulkFileInput.click());
 
         bulkFileInput.addEventListener('change', function(e) {
@@ -344,42 +542,30 @@
             reader.onload = function(e) {
                 try {
                     const data = new Uint8Array(e.target.result);
-                    // Dùng SheetJS đọc file
                     const workbook = window.XLSX.read(data, {type: 'array'});
                     const firstSheetName = workbook.SheetNames[0];
                     const worksheet = workbook.Sheets[firstSheetName];
                     const json = window.XLSX.utils.sheet_to_json(worksheet, {header: 1});
 
                     bulkParsedData = [];
-                    // Vòng lặp bỏ qua dòng đầu tiên (i = 1) vì thường là header
                     for(let i = 1; i < json.length; i++) {
                         const row = json[i];
                         if(row && row.length > 0) {
-                            // Cột 1 là Tên QR (ID) - index 0
                             const id = row[0] ? String(row[0]).trim() : '';
-                            // Cột 2 là Link sau QR - index 1 (Bỏ qua vì hệ thống tự generate)
-                            // Cột 3 là Link đích gốc - index 2
                             const destUrl = row[2] ? String(row[2]).trim() : '';
-                            
-                            if(id && destUrl) {
-                                bulkParsedData.push({ id, url: destUrl });
-                            }
+                            if(id && destUrl) bulkParsedData.push({ id, url: destUrl });
                         }
                     }
 
-                    if(bulkParsedData.length === 0) {
-                        alert("Không tìm thấy dữ liệu hợp lệ! Hãy đảm bảo Dòng 1 là Tiêu đề, Cột 1 chứa ID và Cột 3 chứa Link gốc.");
-                        return;
-                    }
+                    if(bulkParsedData.length === 0) return alert("Không tìm thấy dữ liệu hợp lệ!");
 
-                    // Render Preview Table
                     const tbody = document.getElementById('bulkTableBody');
                     tbody.innerHTML = '';
                     bulkParsedData.forEach((item, index) => {
                         const rowHtml = `
-                            <tr class="${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-blue-50 transition">
-                                <td class="p-3 border-b border-gray-100 font-mono text-blue-600 font-bold">${item.id}</td>
-                                <td class="p-3 border-b border-gray-100 text-gray-600 max-w-xs truncate" title="${item.url}">${item.url}</td>
+                            <tr class="${index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'} hover:bg-soft-primary-light/30 transition">
+                                <td class="p-3 font-mono text-soft-primary font-semibold">${item.id}</td>
+                                <td class="p-3 text-soft-text max-w-[200px] truncate" title="${item.url}">${item.url}</td>
                             </tr>
                         `;
                         tbody.insertAdjacentHTML('beforeend', rowHtml);
@@ -388,24 +574,20 @@
                     document.getElementById('bulkCount').innerText = bulkParsedData.length;
                     document.getElementById('bulkModal').classList.remove('hidden');
 
-                } catch (error) {
-                    alert("Lỗi khi đọc file: " + error.message);
-                }
+                } catch (error) { alert("Lỗi đọc file: " + error.message); }
             };
             reader.readAsArrayBuffer(file);
-            this.value = ''; // Reset file input
+            this.value = ''; 
         });
 
-        // Đóng/Hủy Modal Bulk
         document.getElementById('btnCloseBulk').addEventListener('click', () => document.getElementById('bulkModal').classList.add('hidden'));
         document.getElementById('btnCancelBulk').addEventListener('click', () => document.getElementById('bulkModal').classList.add('hidden'));
 
-        // Xác nhận Upload và Tải ZIP
         document.getElementById('btnConfirmBulk').addEventListener('click', async () => {
             const btn = document.getElementById('btnConfirmBulk');
             const originalText = btn.innerHTML;
             btn.disabled = true;
-            btn.innerHTML = `<span class="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full"></span> Đang xử lý ${bulkParsedData.length} mã...`;
+            btn.innerHTML = `Đang xử lý...`;
 
             try {
                 const zip = new window.JSZip();
@@ -414,62 +596,44 @@
 
                 for (let i = 0; i < bulkParsedData.length; i++) {
                     const item = bulkParsedData[i];
-                    
-                    // 1. Lưu Dữ liệu vào Database tuần tự
                     await saveLinkWithHistory(item.id, item.url);
-
-                    // 2. Tạo QR Base64
-                    const qrBulk = new QRious({
-                        value: baseUrl + item.id,
-                        size: 800, // Size lớn để in nét hơn
-                        background: 'white',
-                        foreground: '#1f2937'
-                    });
-                    
+                    const qrBulk = new QRious({ value: baseUrl + item.id, size: 800, background: 'white', foreground: '#2f80ed' });
                     const base64Data = qrBulk.image.src.split(',')[1];
-                    // Thêm vào file ZIP
                     zip.file(`${item.id}.png`, base64Data, {base64: true});
                 }
 
-                // 3. Tiến hành đóng gói và tự động tải xuống ZIP
                 const content = await zip.generateAsync({type: "blob"});
-                window.saveAs(content, `HaiChai_Bulk_QR_${new Date().toISOString().split('T')[0]}.zip`);
-
-                alert(`Đã lưu thành công ${bulkParsedData.length} mã vào hệ thống và tải xuống file ZIP ảnh!`);
+                window.saveAs(content, `HaiChai_QR_${new Date().toISOString().split('T')[0]}.zip`);
                 document.getElementById('bulkModal').classList.add('hidden');
                 
-            } catch (err) {
-                alert("Đã xảy ra lỗi trong quá trình xử lý: " + err.message);
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = originalText;
-            }
+            } catch (err) { alert("Lỗi xử lý: " + err.message); } 
+            finally { btn.disabled = false; btn.innerHTML = originalText; }
         });
 
 
-        // BẢNG QUẢN LÝ LINK & LỊCH SỬ
+        // History Modal
         async function showHistory(id) {
             const historyRef = ref(db, 'link_history/' + id);
             const snapshot = await get(historyRef);
             const historyData = snapshot.val();
             
-            document.getElementById('historyTargetId').innerText = `ID: ${id}`;
+            document.getElementById('historyTargetId').innerText = id;
             const listEl = document.getElementById('historyList');
             listEl.innerHTML = '';
 
             if (!historyData) {
-                listEl.innerHTML = '<div class="text-center py-10 text-gray-400">Chưa có lịch sử thay đổi cho mã này.</div>';
+                listEl.innerHTML = '<div class="text-center py-8 text-soft-muted text-sm">No history available.</div>';
             } else {
                 Object.entries(historyData).reverse().forEach(([key, item]) => {
                     const row = document.createElement('div');
-                    row.className = "bg-gray-50 p-4 rounded-xl border border-gray-100 hover:border-blue-200 transition group";
+                    row.className = "p-4 rounded-xl border border-soft-border bg-gray-50/50 hover:bg-white transition group";
                     row.innerHTML = `
-                        <div class="flex justify-between items-start mb-2">
-                            <span class="text-[10px] font-bold bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full uppercase">${item.timestamp}</span>
-                            <button class="btn-restore opacity-0 group-hover:opacity-100 bg-blue-600 text-white text-xs px-3 py-1 rounded-lg transition" data-id="${id}" data-url="${item.url}">Khôi phục ↺</button>
+                        <div class="flex justify-between items-start mb-1.5">
+                            <span class="text-[10px] font-bold text-soft-muted">${item.timestamp}</span>
+                            <button class="btn-restore opacity-0 group-hover:opacity-100 text-soft-primary hover:text-blue-700 text-xs font-semibold transition" data-id="${id}" data-url="${item.url}">Restore</button>
                         </div>
-                        <p class="text-sm font-mono text-gray-600 break-all">${item.url}</p>
-                        <p class="text-[10px] text-gray-400 mt-1 italic">Người thay đổi: ${item.savedBy}</p>
+                        <p class="text-xs font-mono text-soft-text break-all mb-1">${item.url}</p>
+                        <p class="text-[10px] text-soft-muted">By: ${item.savedBy}</p>
                     `;
                     listEl.appendChild(row);
                 });
@@ -478,10 +642,9 @@
                     btn.addEventListener('click', async (e) => {
                         const rid = e.target.getAttribute('data-id');
                         const rurl = e.target.getAttribute('data-url');
-                        if (confirm(`Khôi phục mã [${rid}] về link cũ?`)) {
+                        if (confirm(`Restore [${rid}]?`)) {
                             await saveLinkWithHistory(rid, rurl);
                             document.getElementById('historyModal').classList.add('hidden');
-                            alert("Đã khôi phục thành công!");
                         }
                     });
                 });
@@ -489,12 +652,18 @@
             document.getElementById('historyModal').classList.remove('hidden');
         }
 
+        // Render Tables & Charts
         function renderLinksTable(data, searchTerm = '') {
             const tbody = document.getElementById('linksTableBody');
             tbody.innerHTML = '';
-            if (!data) return;
+            if (!data) {
+                document.getElementById('totalLinksStat').innerText = '0';
+                return;
+            }
             
             let entries = Object.entries(data);
+            document.getElementById('totalLinksStat').innerText = entries.length;
+
             if (searchTerm) {
                 const lowerTerm = searchTerm.toLowerCase();
                 entries = entries.filter(([id, url]) => id.toLowerCase().includes(lowerTerm) || url.toLowerCase().includes(lowerTerm));
@@ -502,13 +671,17 @@
             
             entries.reverse().forEach(([id, url]) => {
                 const tr = document.createElement('tr');
-                tr.className = "hover:bg-blue-50 border-b border-gray-50 transition";
+                tr.className = "hover:bg-soft-page transition";
                 tr.innerHTML = `
-                    <td class="p-4 font-bold text-blue-600 font-mono">${id}</td>
-                    <td class="p-4 text-gray-500 max-w-xs truncate" title="${url}">${url}</td>
-                    <td class="p-4 text-center space-x-2">
-                        <button class="btn-edit-link bg-gray-100 px-3 py-1 rounded text-xs hover:bg-gray-200" data-id="${id}" data-url="${url}">Sửa</button>
-                        <button class="btn-show-history bg-blue-50 text-blue-600 px-3 py-1 rounded text-xs font-bold hover:bg-blue-100" data-id="${id}">Lịch sử 🕒</button>
+                    <td class="p-4 font-mono text-soft-primary font-semibold text-xs">${id}</td>
+                    <td class="p-4 text-soft-text max-w-[150px] truncate" title="${url}">${url}</td>
+                    <td class="p-4 text-center space-x-1">
+                        <button class="btn-edit-link text-soft-muted hover:text-soft-primary p-1" data-id="${id}" data-url="${url}" title="Edit">
+                            <svg class="w-4 h-4 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                        </button>
+                        <button class="btn-show-history text-soft-muted hover:text-soft-text p-1" data-id="${id}" title="History">
+                            <svg class="w-4 h-4 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </button>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -518,26 +691,19 @@
                 qrIdInput.value = e.target.dataset.id;
                 qrDestInput.value = e.target.dataset.url;
                 updateQRPreview();
-                qrCanvas.classList.remove('opacity-20');
+                qrCanvas.classList.remove('opacity-30');
                 document.getElementById('btnDownload').disabled = false;
                 document.getElementById('qrFormSection').scrollIntoView({ behavior: 'smooth' });
             }));
             document.querySelectorAll('.btn-show-history').forEach(b => b.addEventListener('click', e => showHistory(e.target.dataset.id)));
         }
 
-        // ==========================================
-        // KHU VỰC RENDER BIỂU ĐỒ & LOG QUÉT
-        // ==========================================
-        
         function parseDateString(timeStr) {
             try {
                 if (!timeStr) return null;
                 const match = timeStr.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
                 if (!match) return null;
-                const day = match[1].padStart(2, '0');
-                const month = match[2].padStart(2, '0');
-                const year = match[3];
-                return `${year}-${month}-${day}`;
+                return `${match[3]}-${match[2].padStart(2, '0')}-${match[1].padStart(2, '0')}`;
             } catch (e) { return null; }
         }
 
@@ -545,7 +711,7 @@
             const qrSelect = document.getElementById('filterQR');
             const currentSelection = qrSelect.value; 
             const uniqueIDs = [...new Set(dataArray.map(log => log.id).filter(Boolean))];
-            let html = '<option value="ALL">-- Tất cả mã QR --</option>';
+            let html = '<option value="ALL">-- Tất cả ID --</option>';
             uniqueIDs.forEach(id => { html += `<option value="${id}">${id}</option>`; });
             qrSelect.innerHTML = html;
             if (uniqueIDs.includes(currentSelection)) qrSelect.value = currentSelection;
@@ -558,34 +724,50 @@
             let tableHtml = '';
 
             const displayLogs = dataToRender.slice(0, 100);
-            document.getElementById('showingCount').innerText = `Đang hiển thị: ${displayLogs.length} / ${dataToRender.length}`;
+            document.getElementById('showingCount').innerText = `Showing: ${displayLogs.length} / ${dataToRender.length}`;
 
             dataToRender.forEach(log => {
                 idCount[log.id || 'Unknown'] = (idCount[log.id || 'Unknown'] || 0) + 1;
-                const city = log.city || "Chưa xác định";
+                const city = log.city || "Unknown";
                 cityCount[city] = (cityCount[city] || 0) + 1;
             });
 
             displayLogs.forEach(log => {
                 tableHtml += `
-                    <tr class="hover:bg-blue-50 transition border-b border-gray-50">
-                        <td class="p-4 text-gray-500 whitespace-nowrap">${log.time}</td>
-                        <td class="p-4 font-bold text-blue-600">${log.id}</td>
-                        <td class="p-4 text-gray-700">${log.city || '-'}</td>
-                        <td class="p-4 text-gray-400 text-xs max-w-[200px] truncate" title="${log.ua}">${log.ua}</td>
+                    <tr class="hover:bg-soft-page transition">
+                        <td class="p-4 text-soft-muted whitespace-nowrap">${log.time}</td>
+                        <td class="p-4 font-mono text-soft-primary font-medium">${log.id}</td>
+                        <td class="p-4 text-soft-text">${log.city || '-'}</td>
+                        <td class="p-4 text-soft-muted text-[10px] max-w-[150px] truncate" title="${log.ua}">${log.ua}</td>
                     </tr>
                 `;
             });
             document.getElementById('logTableBody').innerHTML = tableHtml;
 
+            // Soft UI Chart configs
             if(idChartInstance) idChartInstance.destroy();
             idChartInstance = new Chart(document.getElementById('idChart').getContext('2d'), {
                 type: 'bar',
                 data: {
                     labels: Object.keys(idCount),
-                    datasets: [{ label: 'Lượt quét', data: Object.values(idCount), backgroundColor: '#3b82f6', borderRadius: 4 }]
+                    datasets: [{ 
+                        label: 'Scans', 
+                        data: Object.values(idCount), 
+                        backgroundColor: '#2f80ed', // Primary Blue
+                        borderRadius: 6,
+                        barThickness: 'flex',
+                        maxBarThickness: 30
+                    }]
                 },
-                options: { responsive: true, maintainAspectRatio: false }
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { border: {display: false}, grid: {color: '#edf0f5'} },
+                        x: { border: {display: false}, grid: {display: false} }
+                    }
+                }
             });
 
             if(cityChartInstance) cityChartInstance.destroy();
@@ -593,9 +775,21 @@
                 type: 'doughnut',
                 data: {
                     labels: Object.keys(cityCount),
-                    datasets: [{ data: Object.values(cityCount), backgroundColor: ['#f97316', '#3b82f6', '#10b981', '#8b5cf6', '#ef4444', '#64748b'] }]
+                    datasets: [{ 
+                        data: Object.values(cityCount), 
+                        backgroundColor: ['#2f80ed', '#2ecc71', '#dcecff', '#8a96a8', '#f5f7fb'], 
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
                 },
-                options: { responsive: true, maintainAspectRatio: false }
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false,
+                    cutout: '75%',
+                    plugins: {
+                        legend: { position: 'right', labels: { boxWidth: 10, usePointStyle: true } }
+                    }
+                }
             });
         }
 
@@ -606,7 +800,6 @@
 
             const filteredData = allLogs.filter(log => {
                 if (selectedQR !== 'ALL' && log.id !== selectedQR) return false;
-                
                 if (startDate || endDate) {
                     const logDateStr = parseDateString(log.time);
                     if (!logDateStr) return false; 
@@ -626,20 +819,19 @@
             renderChartsAndLogs(allLogs);
         });
         
-        // Sự kiện tìm kiếm trên bảng Link
         document.getElementById('searchLinkInput').addEventListener('input', (e) => {
             renderLinksTable(currentLinksData, e.target.value);
         });
 
-        // ==========================================
-        // XỬ LÝ AUTH VÀ KÉO DỮ LIỆU
-        // ==========================================
+        // Auth Logic
         onAuthStateChanged(auth, user => {
             if (user) {
                 if (user.email.endsWith('@starspirits.vn') || VIP_EMAILS.includes(user.email)) {
-                    document.getElementById('loginScreen').classList.add('hidden');
+                    document.getElementById('loginScreen').classList.add('opacity-0', 'pointer-events-none');
                     document.getElementById('mainDashboard').classList.remove('hidden');
-                    document.getElementById('userInfo').innerText = user.email;
+                    // Display name or split email
+                    const displayName = user.displayName || user.email.split('@')[0];
+                    document.getElementById('userInfo').innerText = displayName;
                     
                     onValue(ref(db, 'links'), snap => {
                         currentLinksData = snap.val();
@@ -657,13 +849,12 @@
                 } else {
                     signOut(auth).then(() => {
                         const errEl = document.getElementById('loginError');
-                        errEl.innerText = `Email ${user.email} chưa được cấp quyền truy cập!`;
+                        errEl.innerText = "Access Denied: Please use authorized email.";
                         errEl.classList.remove('hidden');
                     });
                 }
             } else {
-                document.getElementById('loginScreen').classList.remove('hidden');
-                document.body.classList.add('overflow-hidden');
+                document.getElementById('loginScreen').classList.remove('opacity-0', 'pointer-events-none');
             }
         });
 
@@ -671,7 +862,7 @@
             document.getElementById('loginError').classList.add('hidden');
             signInWithPopup(auth, provider).catch(error => {
                 const errEl = document.getElementById('loginError');
-                errEl.innerText = "Lỗi đăng nhập: " + error.message;
+                errEl.innerText = "Login failed: " + error.message;
                 errEl.classList.remove('hidden');
             });
         });
