@@ -156,19 +156,25 @@
                     </div>
                 </div>
 
-                <div class="p-6">
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
-                        <h3 class="text-xs font-bold text-gray-500 uppercase tracking-widest">Danh sách Link & QR đang chạy</h3>
-                        <input type="text" id="searchLinkInput" placeholder="🔍 Tìm nhanh ID hoặc Link..." class="border border-gray-300 rounded-lg p-2 text-sm focus:outline-none focus:border-blue-500 w-full sm:w-1/3 shadow-sm">
-                    </div>
-                    <div class="overflow-y-auto max-h-48 border border-gray-100 rounded-xl">
-                        <table class="w-full text-left text-sm">
-                            <thead class="bg-gray-50 sticky top-0"><tr class="text-gray-500"><th class="p-4 border-b w-1/4">ID</th><th class="p-4 border-b w-2/4">Link Đích</th><th class="p-4 border-b text-center w-1/4">Công cụ</th></tr></thead>
-                            <tbody id="linksTableBody"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
+               <div class="p-6">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
+        <h3 class="text-xs font-bold text-gray-500 uppercase tracking-widest">Danh sách Link & QR đang chạy</h3>
+        <input type="text" id="searchLinkInput" placeholder="🔍 Tìm nhanh ID hoặc Link..." class="border border-gray-300 rounded-lg p-2 text-sm focus:outline-none focus:border-blue-500 w-full sm:w-1/3 shadow-sm">
+    </div>
+
+    <div class="overflow-y-auto max-h-[500px] border border-gray-100 rounded-xl">
+        <table class="w-full text-left text-sm">
+            <thead class="bg-gray-50 sticky top-0">
+                <tr class="text-gray-500">
+                    <th class="p-4 border-b w-1/4">ID</th>
+                    <th class="p-4 border-b w-2/4">Link Đích</th>
+                    <th class="p-4 border-b text-center w-1/4">Công cụ</th>
+                </tr>
+            </thead>
+            <tbody id="linksTableBody"></tbody>
+        </table>
+    </div>
+</div>
 
             <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 mb-8 flex flex-wrap items-end gap-4">
                 <div class="flex flex-col">
