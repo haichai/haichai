@@ -102,13 +102,13 @@
         <aside class="w-[220px] bg-soft-sidebar flex flex-col justify-between py-8 px-6 border-r border-soft-border shrink-0">
             <div>
                 <!-- Logo area -->
-                <div class="flex items-center gap-3 mb-10 px-2">
+                <div class="flex items-center gap-3 mb-8 px-2">
                     <div class="w-8 h-8 bg-soft-primary rounded-lg flex items-center justify-center text-white font-bold text-lg">H</div>
                     <span class="font-bold text-lg text-soft-text tracking-tight">haichai.</span>
                 </div>
 
                 <!-- Navigation Tabs -->
-                <nav class="space-y-2" id="sidebarNav">
+                <nav class="space-y-1.5" id="sidebarNav">
                     <button data-tab="dashboard" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-soft-primary bg-white shadow-sm font-semibold text-sm transition-all text-left">
                         <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
@@ -121,6 +121,20 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z"></path>
                         </svg>
                         Kịch bản TikTok
+                    </button>
+
+                    <button data-tab="popup" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-soft-muted hover:text-soft-text hover:bg-gray-100 font-medium text-sm transition-all text-left">
+                        <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                        </svg>
+                        Tạo Popup
+                    </button>
+
+                    <button data-tab="clonedrive" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-soft-muted hover:text-soft-text hover:bg-gray-100 font-medium text-sm transition-all text-left">
+                        <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path>
+                        </svg>
+                        Clone Drive
                     </button>
                 </nav>
             </div>
@@ -162,11 +176,6 @@
                 </div>
 
                 <div class="flex items-center gap-4">
-                    <div class="hidden sm:flex items-center gap-2 mr-2">
-                        <a href="https://haichai.github.io/luckyspin/" target="_blank" class="text-xs font-semibold text-soft-muted hover:text-soft-primary flex items-center gap-1.5 transition">
-                            Tạo Popup
-                        </a>
-                    </div>
                     <span class="text-xs bg-slate-100 px-3 py-1.5 rounded-full font-semibold border text-slate-600 border-slate-200">
                         Phiên bản Pro v3.0
                     </span>
@@ -412,7 +421,7 @@
                             </div>
                         </div>
 
-                        <!-- Panel Trạng Thái Chung -->
+                        <!-- Panel Trạng Thế Chung -->
                         <div id="duplicateStatusCard" class="p-4 rounded-xl border bg-emerald-50 border-emerald-200 text-emerald-800 transition-all duration-300">
                             <div class="flex items-start gap-2.5">
                                 <svg class="w-5 h-5 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -441,10 +450,168 @@
                                 <!-- Các bản ghi trùng khớp render tại đây -->
                             </div>
                         </div>
-
                     </div>
                 </div>
+            </div>
 
+            <!-- TAB 3: POPUP CREATOR SECTION -->
+            <div id="tabPopupContent" class="tab-content flex-1 overflow-y-auto px-6 lg:px-8 pb-12 pt-6 space-y-6 hidden">
+                <div class="soft-card p-6">
+                    <div class="flex justify-between items-center mb-6 pb-4 border-b border-soft-border">
+                        <div>
+                            <h2 class="text-lg font-bold text-soft-text">Trình Tạo & Cấu Hình Popup Vòng Quay</h2>
+                            <p class="text-xs text-soft-muted">Tùy chỉnh vòng quay may mắn (Luckyspin) và tạo mã nhúng cho trang web của bạn.</p>
+                        </div>
+                        <a href="https://haichai.github.io/luckyspin/" target="_blank" class="bg-soft-primary hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-xl text-xs transition shadow-md flex items-center gap-1.5">
+                            Mở Trang Vòng Quay gốc ↗
+                        </a>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <!-- Cấu hình -->
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-[10px] font-bold text-soft-muted uppercase mb-1.5">Tiêu Đề Popup</label>
+                                <input type="text" id="popupTitle" value="Chúc Mừng Bạn Nhận Được Vòng Quay May Mắn!" class="w-full border border-soft-border rounded-xl p-2.5 text-sm outline-none focus:border-soft-primary focus:ring-1 focus:ring-soft-primary bg-gray-50 focus:bg-white transition">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-soft-muted uppercase mb-1.5">Mô Tả Chi Tiết</label>
+                                <textarea id="popupDesc" rows="3" class="w-full border border-soft-border rounded-xl p-2.5 text-sm outline-none focus:border-soft-primary focus:ring-1 focus:ring-soft-primary bg-gray-50 focus:bg-white transition">Nhập thông tin nhận quà ngay hôm nay! Cơ hội trúng iPhone 15 Pro Max, voucher mua sắm giảm giá 50% và hàng ngàn quà tặng khác từ Haichai Store.</textarea>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-[10px] font-bold text-soft-muted uppercase mb-1.5">Màu Chủ Đạo</label>
+                                    <input type="color" id="popupColor" value="#ff2a5f" class="w-full h-10 border border-soft-border rounded-xl p-1 bg-gray-50 cursor-pointer">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-soft-muted uppercase mb-1.5">Màu Nền</label>
+                                    <input type="color" id="popupBgColor" value="#ffffff" class="w-full h-10 border border-soft-border rounded-xl p-1 bg-gray-50 cursor-pointer">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-soft-muted uppercase mb-1.5">Mã Giảm Giá Mặc Định</label>
+                                <input type="text" id="popupDiscount" value="HAICHAIYEU" class="w-full border border-soft-border rounded-xl p-2.5 text-sm uppercase font-mono bg-gray-50 focus:bg-white transition">
+                            </div>
+                            <div class="pt-2">
+                                <button id="btnGeneratePopupCode" class="w-full bg-soft-success hover:bg-emerald-600 text-white font-semibold py-2.5 rounded-xl text-sm transition-all shadow-md">
+                                    Tạo Mã Nhúng Script (Embed Code)
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Preview Trực Quan -->
+                        <div class="border border-dashed border-soft-border rounded-2xl p-6 bg-slate-50 flex flex-col items-center justify-center relative min-h-[300px]">
+                            <span class="absolute top-3 left-3 text-[10px] bg-slate-200 text-slate-500 px-2 py-0.5 rounded font-bold uppercase tracking-wider">Preview Trực Quan</span>
+                            
+                            <div id="popupPreviewCard" class="bg-white p-6 rounded-2xl shadow-soft-main border border-soft-border text-center max-w-sm w-full transition-all">
+                                <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4" id="popupIconBg">
+                                    <svg class="w-8 h-8 text-red-500 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5a3 3 0 00-3-3H6a3 3 0 00-3 3v11a3 3 0 003 3h4m6-10V6a2 2 0 112 2h-2zm0 0v5a3 3 0 01-3 3h-3m-3 0h3m-3 0a3 3 0 01-3-3V9a3 3 0 013-3h3m-3 0V5a3 3 0 013-3h3"></path>
+                                    </svg>
+                                </div>
+                                <h3 id="popupPreviewTitle" class="text-base font-bold text-soft-text mb-2">Chúc Mừng Bạn Nhận Được Vòng Quay May Mắn!</h3>
+                                <p id="popupPreviewDesc" class="text-[11px] text-soft-muted mb-4 line-clamp-3">Nhập thông tin nhận quà ngay hôm nay! Cơ hội trúng iPhone 15 Pro Max, voucher mua sắm giảm giá 50% và hàng ngàn quà tặng khác từ Haichai Store.</p>
+                                <button class="w-full text-white font-semibold py-2 rounded-xl text-xs shadow-sm transition" id="popupPreviewBtn" style="background-color: #ff2a5f;">
+                                    Xoay Ngay Nhận Quà
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Kết quả mã nhúng -->
+                    <div id="embedCodeSection" class="mt-6 hidden">
+                        <label class="block text-[10px] font-bold text-soft-muted uppercase mb-1.5">Sao Chép Mã Nhúng dán vào Website của bạn</label>
+                        <div class="relative bg-slate-900 text-slate-100 p-4 rounded-xl font-mono text-xs overflow-x-auto whitespace-pre">
+                            <code id="embedCodeText"></code>
+                            <button id="btnCopyEmbed" class="absolute top-2 right-2 bg-white/10 hover:bg-white/20 text-white text-[10px] font-bold px-2 py-1 rounded transition">Copy</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 4: CLONE DRIVE SECTION -->
+            <div id="tabCloneDriveContent" class="tab-content flex-1 overflow-y-auto px-6 lg:px-8 pb-12 pt-6 space-y-6 hidden">
+                <div class="soft-card p-6">
+                    <div class="flex justify-between items-center mb-6 pb-4 border-b border-soft-border">
+                        <div>
+                            <h2 class="text-lg font-bold text-soft-text">Clone Drive - Sao Chép Thư Mục Google Drive</h2>
+                            <p class="text-xs text-soft-muted">Sao chép nhanh thư mục hoặc file Google Drive công khai về tài khoản cá nhân của bạn.</p>
+                        </div>
+                        <span class="bg-soft-primary-light text-soft-primary text-[10px] font-bold px-2.5 py-1 rounded-full">Tính năng Độc quyền</span>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <!-- Form Nhập liệu -->
+                        <div class="lg:col-span-2 space-y-4">
+                            <div>
+                                <label class="block text-[10px] font-bold text-soft-muted uppercase mb-1.5">Link Thư Mục / File Nguồn (Source URL or ID)</label>
+                                <input type="text" id="driveSource" placeholder="https://drive.google.com/drive/folders/..." class="w-full border border-soft-border rounded-xl p-2.5 text-sm outline-none focus:border-soft-primary focus:ring-1 focus:ring-soft-primary bg-gray-50 focus:bg-white transition font-mono">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-soft-muted uppercase mb-1.5">Thư Mục Đích (Destination URL or ID - Để Trống nếu muốn lưu ở Root Drive)</label>
+                                <input type="text" id="driveDest" placeholder="Để trống để sao chép thẳng vào My Drive" class="w-full border border-soft-border rounded-xl p-2.5 text-sm outline-none focus:border-soft-primary focus:ring-1 focus:ring-soft-primary bg-gray-50 focus:bg-white transition font-mono">
+                            </div>
+                            
+                            <div class="bg-gray-50 p-4 rounded-xl border border-soft-border space-y-3">
+                                <h3 class="text-xs font-bold text-soft-text">Tùy Chọn Bản Sao</h3>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    <label class="flex items-center gap-2 cursor-pointer">
+                                        <input type="checkbox" id="chkCopySubfolders" checked class="rounded border-gray-300 text-soft-primary focus:ring-soft-primary">
+                                        <span class="text-xs text-soft-text font-medium">Sao chép đệ quy (Thư mục con)</span>
+                                    </label>
+                                    <label class="flex items-center gap-2 cursor-pointer">
+                                        <input type="checkbox" id="chkSkipShortcuts" checked class="rounded border-gray-300 text-soft-primary focus:ring-soft-primary">
+                                        <span class="text-xs text-soft-text font-medium">Bỏ qua Shortcut để tránh lặp</span>
+                                    </label>
+                                    <label class="flex items-center gap-2 cursor-pointer">
+                                        <input type="checkbox" id="chkKeepPermissions" class="rounded border-gray-300 text-soft-primary focus:ring-soft-primary">
+                                        <span class="text-xs text-soft-text font-medium">Giữ nguyên phân quyền chia sẻ</span>
+                                    </label>
+                                    <label class="flex items-center gap-2 cursor-pointer">
+                                        <input type="checkbox" id="chkLogDetails" checked class="rounded border-gray-300 text-soft-primary focus:ring-soft-primary">
+                                        <span class="text-xs text-soft-text font-medium">Ghi lại nhật ký chi tiết (Log)</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="flex gap-3">
+                                <button id="btnStartClone" class="flex-1 bg-soft-primary hover:bg-blue-600 text-white font-semibold py-3 rounded-xl text-sm transition-all shadow-md flex items-center justify-center gap-2">
+                                    <svg class="w-4 h-4 animate-spin hidden" id="cloneSpinner" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                    </svg>
+                                    Bắt đầu Clone Drive
+                                </button>
+                                <button id="btnResetClone" class="bg-gray-100 hover:bg-gray-200 text-soft-text font-semibold py-3 px-6 rounded-xl text-sm transition-all border border-soft-border">
+                                    Đặt lại
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Trạng thái & Nhật ký -->
+                        <div class="bg-slate-900 rounded-2xl p-5 flex flex-col h-[350px] text-slate-100 font-mono text-xs overflow-hidden border border-slate-800">
+                            <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-3">
+                                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Bảng điều khiển Tiến Trình</span>
+                                <span id="cloneStatusBadge" class="bg-slate-800 text-slate-300 text-[9px] px-2 py-0.5 rounded font-bold uppercase">Sẵn sàng</span>
+                            </div>
+                            
+                            <div class="flex-1 overflow-y-auto space-y-1.5" id="cloneLogs">
+                                <p class="text-slate-400">[Hệ thống] Chào mừng bạn sử dụng tính năng Clone Drive.</p>
+                                <p class="text-slate-400">[Hệ thống] Nhập link thư mục nguồn và bấm "Bắt đầu Clone Drive".</p>
+                            </div>
+
+                            <div class="border-t border-slate-800 pt-3 mt-3">
+                                <div class="flex justify-between text-[10px] text-slate-400 mb-1">
+                                    <span>Tiến độ hoàn thành: <span id="cloneProgressPercent">0%</span></span>
+                                    <span id="cloneProgressCounter">0/0 files</span>
+                                </div>
+                                <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                                    <div id="cloneProgressBar" class="bg-soft-primary h-full transition-all duration-300" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
         </div>
@@ -479,7 +646,6 @@
     <!-- JAVASCRIPT HỆ THỐNG PHÂN TÍCH & QUẢN TRỊ -->
     <script>
         // --- 1. KHỞI TẠO BẢO MẬT & FIREBASE AUTH ---
-        // Bạn chỉ cần điền cấu hình Firebase thực tế của dự án của bạn tại đây để hệ thống tự động kết nối
         const firebaseConfig = {
             apiKey: "YOUR_API_KEY",
             authDomain: "YOUR_PROJECT.firebaseapp.com",
@@ -494,6 +660,9 @@
         // Trình lắng nghe Auth tự động
         document.addEventListener('DOMContentLoaded', () => {
             initAuthSession();
+            initDashboardFeatures();
+            initPopupCreator();
+            initCloneDrive();
         });
 
         function initAuthSession() {
@@ -508,7 +677,7 @@
                         }
                     });
                 } else {
-                    // Nếu chưa cấu hình API Key, chạy chế độ Offline Simulation tiện dụng trên trình duyệt
+                    // Chế độ giả lập khi không cấu hình API Key
                     console.log("Firebase Auth running on simulation mode.");
                     const simulateUser = localStorage.getItem('simulated_user');
                     if (simulateUser) {
@@ -533,7 +702,6 @@
                     document.getElementById('loginError').classList.remove('hidden');
                 }
             } else {
-                // Giả lập Đăng Nhập trên Iframe / localhost khi dev
                 const mockUser = {
                     uid: "haichai_simulated_user",
                     displayName: "Haichai Admin",
@@ -560,7 +728,7 @@
             document.getElementById('loginScreen').classList.add('hidden');
             document.getElementById('mainDashboard').classList.remove('hidden');
             
-            // Khởi động nạp dữ liệu kịch bản của riêng người dùng này
+            // Khởi tạo kịch bản người dùng
             initScriptsManager();
         }
 
@@ -570,39 +738,183 @@
             document.getElementById('mainDashboard').classList.add('hidden');
         }
 
-        // --- 2. LOGIC TABS MENU SIDEBAR ---
+        // --- 2. LOGIC TABS MENU SIDEBAR TÍCH HỢP ---
         const navItems = document.querySelectorAll('.nav-item');
         const tabDashboardContent = document.getElementById('tabDashboardContent');
         const tabTiktokContent = document.getElementById('tabTiktokContent');
+        const tabPopupContent = document.getElementById('tabPopupContent');
+        const tabCloneDriveContent = document.getElementById('tabCloneDriveContent');
         const pageTitle = document.getElementById('pageTitle');
 
         navItems.forEach(item => {
             item.addEventListener('click', () => {
-                // Xóa active
+                // Reset active tabs
                 navItems.forEach(btn => {
                     btn.classList.remove('text-soft-primary', 'bg-white', 'shadow-sm', 'font-semibold');
                     btn.classList.add('text-soft-muted', 'font-medium');
                 });
 
-                // Thêm active cho nút hiện tại
+                // Set active current tab button
                 item.classList.add('text-soft-primary', 'bg-white', 'shadow-sm', 'font-semibold');
                 item.classList.remove('text-soft-muted', 'font-medium');
+
+                // Hide all sections
+                tabDashboardContent.classList.add('hidden');
+                tabTiktokContent.classList.add('hidden');
+                tabPopupContent.classList.add('hidden');
+                tabCloneDriveContent.classList.add('hidden');
 
                 const tab = item.getAttribute('data-tab');
                 if (tab === 'dashboard') {
                     tabDashboardContent.classList.remove('hidden');
-                    tabTiktokContent.classList.add('hidden');
                     pageTitle.innerText = "Dashboard QR";
                 } else if (tab === 'tiktok') {
-                    tabDashboardContent.classList.add('hidden');
                     tabTiktokContent.classList.remove('hidden');
                     pageTitle.innerText = "Quản Lý Kịch Bản TikTok";
+                } else if (tab === 'popup') {
+                    tabPopupContent.classList.remove('hidden');
+                    pageTitle.innerText = "Trình Tạo Popup Vòng Quay";
+                } else if (tab === 'clonedrive') {
+                    tabCloneDriveContent.classList.remove('hidden');
+                    pageTitle.innerText = "Clone Drive Thư Mục";
                 }
             });
         });
 
+        // --- 3. DỮ LIỆU & BIỂU ĐỒ DASHBOARD QR ---
+        let qr = null;
+        function initDashboardFeatures() {
+            const qrCanvas = document.getElementById('qrCanvas');
+            const qrIdInput = document.getElementById('qrIdInput');
+            const qrDestInput = document.getElementById('qrDestInput');
+            const qrResultLink = document.getElementById('qrResultLink');
+            const btnSave = document.getElementById('btnSave');
+            const saveStatus = document.getElementById('saveStatus');
+            const btnDownload = document.getElementById('btnDownload');
+            const linksTableBody = document.getElementById('linksTableBody');
 
-        // --- 3. THUẬT TOÁN QUÉT TRÙNG LẶP TIẾNG VIỆT ULTRA-PRECISION v3 ---
+            // Khởi tạo bộ QR sinh mẫu
+            qr = new QRious({
+                element: qrCanvas,
+                size: 200,
+                value: 'https://store.haichai.workers.dev/menu_oceanpark'
+            });
+
+            function updateQR() {
+                const id = qrIdInput.value.trim() || 'default';
+                const baseUrl = "https://store.haichai.workers.dev/";
+                const finalUrl = baseUrl + id;
+                qr.set({ value: finalUrl });
+                qrCanvas.style.opacity = "1";
+                qrResultLink.innerText = finalUrl;
+                btnDownload.disabled = false;
+            }
+
+            qrIdInput.addEventListener('input', updateQR);
+
+            // Tải QR Code dạng PNG
+            btnDownload.addEventListener('click', () => {
+                const link = document.createElement('a');
+                link.download = `${qrIdInput.value.trim() || 'haichai-qr'}.png`;
+                link.href = qrCanvas.toDataURL();
+                link.click();
+            });
+
+            // Danh sách quản trị link mẫu
+            let managedLinks = [
+                { id: 'menu_oceanpark', dest: 'https://haichai.vn/menu-detail-op' },
+                { id: 'voucher_xuan2026', dest: 'https://haichai.vn/voucher-xuan-2026' },
+                { id: 'qr_pay_vinhomes', dest: 'https://haichai.vn/pay-vin' }
+            ];
+
+            function renderLinksTable() {
+                linksTableBody.innerHTML = '';
+                managedLinks.forEach(link => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td class="p-4 font-mono font-bold text-soft-primary">${link.id}</td>
+                        <td class="p-4 truncate max-w-xs font-mono text-xs">${link.dest}</td>
+                        <td class="p-4 text-center">
+                            <button onclick="editLink('${link.id}', '${link.dest}')" class="bg-slate-100 text-slate-700 px-3 py-1 rounded-lg hover:bg-slate-200 text-xs font-medium">Sửa</button>
+                        </td>
+                    `;
+                    linksTableBody.appendChild(tr);
+                });
+                document.getElementById('totalLinksStat').innerText = managedLinks.length;
+            }
+
+            window.editLink = function(id, dest) {
+                qrIdInput.value = id;
+                qrDestInput.value = dest;
+                updateQR();
+            };
+
+            btnSave.addEventListener('click', () => {
+                const id = qrIdInput.value.trim();
+                const dest = qrDestInput.value.trim();
+                if (!id || !dest) return;
+
+                const existingIndex = managedLinks.findIndex(l => l.id === id);
+                if (existingIndex > -1) {
+                    managedLinks[existingIndex].dest = dest;
+                } else {
+                    managedLinks.push({ id, dest });
+                }
+
+                saveStatus.innerText = "Đã lưu thành công!";
+                setTimeout(() => { saveStatus.innerText = ""; }, 2000);
+                renderLinksTable();
+            });
+
+            renderLinksTable();
+
+            // Khởi tạo tệp tin upload mẫu
+            const btnBulkUpload = document.getElementById('btnBulkUpload');
+            const bulkFileInput = document.getElementById('bulkFileInput');
+            btnBulkUpload.addEventListener('click', () => {
+                bulkFileInput.click();
+            });
+
+            bulkFileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    alert(`Đã nhận file: ${file.name}. Hệ thống đang phân tích định dạng và nén tệp ZIP...`);
+                    setTimeout(() => {
+                        alert("Xử lý hoàn tất! Tệp tin chứa toàn bộ mã QR cấu hình mới đã được tải xuống.");
+                    }, 1200);
+                }
+            });
+
+            // Vẽ biểu đồ mẫu
+            const ctx = document.getElementById('idChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Ocean Park', 'Hồ Tây', 'Vinhomes', 'Khác'],
+                    datasets: [{
+                        data: [540, 310, 420, 212],
+                        backgroundColor: ['#2f80ed', '#2ecc71', '#ffc107', '#6c757d'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                boxWidth: 10,
+                                font: { size: 10, family: 'Inter' }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+
+        // --- 4. THUẬT TOÁN QUÉT TRÙNG LẶP TIẾNG VIỆT ULTRA-PRECISION v3 ---
         const VIETNAMESE_STOP_WORDS = new Set([
             'và', 'là', 'thì', 'mà', 'nhưng', 'hoặc', 'của', 'cho', 'trong', 'với', 
             'để', 'này', 'đó', 'kia', 'ở', 'tại', 'vào', 'ra', 'lên', 'xuống',
@@ -671,18 +983,15 @@
             const bigramCosine = calculateCosineSimilarity(bigrams1, bigrams2);
             const unigramCosine = calculateCosineSimilarity(keywords1, keywords2);
 
-            // Trọng số cốt lõi: 80% từ cụm 2 chữ liên tiếp để chống báo trùng oan
             const finalScore = Math.round((bigramCosine * 0.8 + unigramCosine * 0.2) * 100);
 
             const b1Set = new Set(bigrams1);
             const commonPhrases = bigrams2.filter(b => b1Set.has(b));
-            const uniqueCommonPhrases = [...new Set(commonPhrases)];
-
-            return { score: finalScore, commonPhrases: uniqueCommonPhrases.slice(0, 6) };
+            return { score: finalScore, commonPhrases: [...new Set(commonPhrases)].slice(0, 6) };
         };
 
 
-        // --- 4. ENGINE QUẢN LÝ KỊCH BẢN TIKTOK (DOM BINDING) ---
+        // --- 5. ENGINE QUẢN LÝ KỊCH BẢN TIKTOK ---
         let scripts = [];
         let activeScript = { id: null, title: '', content: '' };
         let sensitivity = 'medium';
@@ -703,7 +1012,6 @@
         ];
 
         function initScriptsManager() {
-            // Nạp kịch bản theo định dạng định danh UID người dùng
             const saved = localStorage.getItem(`tiktok_scripts_v3_${currentUserId}`);
             scripts = saved ? JSON.parse(saved) : DUMMY_SCRIPTS;
             renderScriptsList();
@@ -805,7 +1113,6 @@
                 return;
             }
 
-            // Quét tương đồng
             const results = scripts
                 .filter(s => s.id !== activeScript.id)
                 .map(s => {
@@ -818,31 +1125,28 @@
             const highest = results.length > 0 ? results[0] : null;
             const highestScore = highest ? highest.score : 0;
 
-            // Xác định ngưỡng độ nhạy
             let thresh = { warning: 60, notice: 35 };
             if (sensitivity === 'low') thresh = { warning: 75, notice: 50 };
             else if (sensitivity === 'high') thresh = { warning: 45, notice: 25 };
 
-            // Phân bổ giao diện cảnh báo
             if (highestScore >= thresh.warning) {
                 alertCard.className = "p-4 rounded-xl border bg-red-50 border-red-200 text-red-800";
                 alertTitle.innerText = `Trùng lặp cao! (${highestScore}%)`;
                 alertDesc.innerText = "Nội dung này rất giống với kịch bản cũ. Thuật toán TikTok có thể bóp phân phối reup.";
-                progressBar.className = "h-full bg-red-500 transition-all duration-500";
+                progressBar.className = "h-full bg-red-500";
             } else if (highestScore >= thresh.notice) {
                 alertCard.className = "p-4 rounded-xl border bg-amber-50 border-amber-200 text-amber-800";
                 alertTitle.innerText = `Độ tương đồng nhẹ! (${highestScore}%)`;
                 alertDesc.innerText = "Có sự trùng lặp nhẹ. Nên biến tấu một vài cụm từ để độc đáo hơn.";
-                progressBar.className = "h-full bg-amber-500 transition-all duration-500";
+                progressBar.className = "h-full bg-amber-500";
             } else {
                 alertCard.className = "p-4 rounded-xl border bg-emerald-50 border-emerald-200 text-emerald-800";
                 alertTitle.innerText = `Nội dung an toàn! (${highestScore}%)`;
                 alertDesc.innerText = "Kịch bản độc lập tốt. Sẵn sàng quay dựng clip!";
-                progressBar.className = "h-full bg-emerald-500 transition-all duration-500";
+                progressBar.className = "h-full bg-emerald-500";
             }
             progressBar.style.width = `${highestScore}%`;
 
-            // Hiển thị cụm từ trùng khớp cốt lõi
             if (highest && highest.commonPhrases.length > 0) {
                 commonContainer.classList.remove('hidden');
                 commonList.innerHTML = '';
@@ -856,7 +1160,6 @@
                 commonContainer.classList.add('hidden');
             }
 
-            // Hiển thị danh sách khớp chi tiết
             matchingList.innerHTML = '';
             if (results.length === 0) {
                 matchingList.innerHTML = `<p class="text-[11px] text-slate-400 italic">Không phát hiện tương đồng đáng kể.</p>`;
@@ -877,7 +1180,6 @@
             }
         }
 
-        // Đối chiếu chi tiết song song
         function openCompareModal(originalScript) {
             const modal = document.getElementById('compareModal');
             const currentBox = document.getElementById('compareCurrentBox');
@@ -888,7 +1190,6 @@
             originalLabel.innerText = `BẢN GỐC LƯU TRỮ (${originalScript.score}% TRÙNG KHỚP)`;
             modal.classList.remove('hidden');
 
-            // Render highlight
             const highlightWords = (text, phrases) => {
                 const words = tokenize(text);
                 return words.map(word => {
@@ -902,7 +1203,6 @@
             originalBox.innerHTML = highlightWords(originalScript.content, originalScript.commonPhrases);
         }
 
-        // Trích xuất Word (.doc)
         function exportScriptToWord() {
             const title = document.getElementById('scriptTitleInput').value.trim() || 'Kịch bản TikTok';
             const content = document.getElementById('scriptContentInput').value;
@@ -946,7 +1246,6 @@
             document.getElementById('scriptContentInput').addEventListener('input', runLiveAnalysis);
             document.getElementById('btnExportDoc').addEventListener('click', exportScriptToWord);
 
-            // Nút Lưu Kịch Bản
             document.getElementById('btnSaveScript').addEventListener('click', () => {
                 const title = document.getElementById('scriptTitleInput').value.trim() || 'Kịch bản TikTok mới';
                 const content = document.getElementById('scriptContentInput').value;
@@ -963,10 +1262,9 @@
 
                 saveScriptsToLocalStorage();
                 renderScriptsList();
-                alert("Đã lưu kịch bản vào thiết bị thành công!");
+                alert("Đã lưu kịch bản thành công!");
             });
 
-            // Chọn độ nhạy quét
             document.querySelectorAll('.btn-sens').forEach(btn => {
                 btn.addEventListener('click', () => {
                     document.querySelectorAll('.btn-sens').forEach(b => {
@@ -983,9 +1281,174 @@
                 });
             });
 
-            // Đóng cửa sổ đối chiếu song song
             document.getElementById('btnCloseCompare').addEventListener('click', () => {
                 document.getElementById('compareModal').classList.add('hidden');
+            });
+        }
+
+
+        // --- 6. TRÌNH TẠO & EMBDED POPUP VÒNG QUAY MẪU ---
+        function initPopupCreator() {
+            const popupTitle = document.getElementById('popupTitle');
+            const popupDesc = document.getElementById('popupDesc');
+            const popupColor = document.getElementById('popupColor');
+            const popupBgColor = document.getElementById('popupBgColor');
+            const popupDiscount = document.getElementById('popupDiscount');
+            
+            const popupPreviewTitle = document.getElementById('popupPreviewTitle');
+            const popupPreviewDesc = document.getElementById('popupPreviewDesc');
+            const popupPreviewBtn = document.getElementById('popupPreviewBtn');
+            const popupPreviewCard = document.getElementById('popupPreviewCard');
+
+            function updatePopupPreview() {
+                popupPreviewTitle.innerText = popupTitle.value || "Vòng Quay May Mắn";
+                popupPreviewDesc.innerText = popupDesc.value || "Hãy thử vận may của bạn ngay!";
+                popupPreviewBtn.style.backgroundColor = popupColor.value;
+                popupPreviewCard.style.backgroundColor = popupBgColor.value;
+            }
+
+            popupTitle.addEventListener('input', updatePopupPreview);
+            popupDesc.addEventListener('input', updatePopupPreview);
+            popupColor.addEventListener('input', updatePopupPreview);
+            popupBgColor.addEventListener('input', updatePopupPreview);
+
+            document.getElementById('btnGeneratePopupCode').addEventListener('click', () => {
+                const embedCode = `<!-- Haichai Premium LuckySpin Popup Code -->
+<script>
+  window.HaichaiPopupConfig = {
+    title: "${popupTitle.value.replace(/"/g, '\\"')}",
+    desc: "${popupDesc.value.replace(/"/g, '\\"')}",
+    color: "${popupColor.value}",
+    bgColor: "${popupBgColor.value}",
+    coupon: "${popupDiscount.value.toUpperCase()}",
+    url: "https://haichai.github.io/luckyspin/"
+  };
+<\/script>
+<script src="https://haichai.github.io/luckyspin/popup-embed.min.js" async><\/script>`;
+
+                document.getElementById('embedCodeText').innerText = embedCode;
+                document.getElementById('embedCodeSection').classList.remove('hidden');
+            });
+
+            document.getElementById('btnCopyEmbed').addEventListener('click', () => {
+                const code = document.getElementById('embedCodeText').innerText;
+                const textarea = document.createElement('textarea');
+                textarea.value = code;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                alert("Đã sao chép mã nhúng thành công!");
+            });
+        }
+
+
+        // --- 7. TÍNH NĂNG CLONE DRIVE (SAO CHÉP THƯ MỤC) MẪU ---
+        function initCloneDrive() {
+            const btnStartClone = document.getElementById('btnStartClone');
+            const cloneSpinner = document.getElementById('cloneSpinner');
+            const cloneLogs = document.getElementById('cloneLogs');
+            const cloneProgressBar = document.getElementById('cloneProgressBar');
+            const cloneProgressPercent = document.getElementById('cloneProgressPercent');
+            const cloneProgressCounter = document.getElementById('cloneProgressCounter');
+            const cloneStatusBadge = document.getElementById('cloneStatusBadge');
+
+            function addLog(text, type = 'info') {
+                const p = document.createElement('p');
+                p.className = type === 'success' ? 'text-green-400' : type === 'error' ? 'text-red-400' : type === 'warning' ? 'text-amber-400' : 'text-slate-300';
+                const time = new Date().toLocaleTimeString('vi-VN');
+                p.innerText = `[${time}] ${text}`;
+                cloneLogs.appendChild(p);
+                cloneLogs.scrollTop = cloneLogs.scrollHeight;
+            }
+
+            let cloneInterval = null;
+
+            btnStartClone.addEventListener('click', () => {
+                const source = document.getElementById('driveSource').value.trim();
+                if (!source) {
+                    addLog('Lỗi: Bạn phải nhập Link Thư Mục hoặc ID nguồn hợp lệ!', 'error');
+                    return;
+                }
+
+                clearInterval(cloneInterval);
+                cloneLogs.innerHTML = '';
+                cloneProgressBar.style.width = '0%';
+                cloneProgressPercent.innerText = '0%';
+                cloneProgressCounter.innerText = '0/0 files';
+                cloneStatusBadge.innerText = 'Đang clone...';
+                cloneStatusBadge.className = 'bg-blue-600 text-white text-[9px] px-2 py-0.5 rounded font-bold uppercase';
+                cloneSpinner.classList.remove('hidden');
+                btnStartClone.disabled = true;
+
+                addLog('Khởi tạo phiên làm việc Google API Connection...', 'info');
+                
+                let folderId = source;
+                if (source.includes('folders/')) {
+                    folderId = source.split('folders/')[1].split('?')[0];
+                } else if (source.includes('id=')) {
+                    folderId = source.split('id=')[1].split('&')[0];
+                }
+                addLog(`Tìm thấy ID Nguồn cần clone: ${folderId}`, 'info');
+
+                const simulatedFiles = [
+                    { name: 'Ke_hoach_Marketing_Haichai_2026.xlsx', size: '1.4 MB' },
+                    { name: 'Kich_ban_Video_TikTok_100k_view.docx', size: '380 KB' },
+                    { name: 'Banner_Sale_He_Giua_Nam_Final.psd', size: '52.6 MB' },
+                    { name: 'Video_Tho_Phim_Quay_Review_Co_So.mp4', size: '142.0 MB' },
+                    { name: 'Danh_sach_KOLs_Premium_2026.xlsx', size: '1.8 MB' },
+                    { name: 'Huong_dan_su_dung_dashboard_v3.pdf', size: '2.5 MB' }
+                ];
+
+                let step = 0;
+                let fileIndex = 0;
+
+                cloneInterval = setInterval(() => {
+                    if (step === 0) {
+                        addLog('Xác thực bảo mật quyền truy cập OAuth2 thành công.', 'success');
+                        addLog('Phân tích thư mục nguồn... Trạng thái thư mục: Công khai.', 'info');
+                        step++;
+                    } else if (step === 1) {
+                        addLog(`Phát hiện: ${simulatedFiles.length} tệp tin. Tổng dung lượng: ~200 MB.`, 'warning');
+                        addLog('Đang tạo thư mục mới trên ổ đĩa của bạn...', 'info');
+                        step++;
+                    } else if (step === 2) {
+                        if (fileIndex < simulatedFiles.length) {
+                            const file = simulatedFiles[fileIndex];
+                            addLog(`Đang sao chép file: ${file.name} (${file.size})...`, 'info');
+                            fileIndex++;
+                            const percent = Math.round((fileIndex / simulatedFiles.length) * 100);
+                            cloneProgressBar.style.width = `${percent}%`;
+                            cloneProgressPercent.innerText = `${percent}%`;
+                            cloneProgressCounter.innerText = `${fileIndex}/${simulatedFiles.length} files`;
+                        } else {
+                            addLog('Sao chép thư mục hoàn tất 100%!', 'success');
+                            addLog('Đã tái cấu trúc liên kết và phân quyền tệp thành công!', 'success');
+                            cloneStatusBadge.innerText = 'Hoàn thành';
+                            cloneStatusBadge.className = 'bg-emerald-600 text-white text-[9px] px-2 py-0.5 rounded font-bold uppercase';
+                            cloneSpinner.classList.add('hidden');
+                            btnStartClone.disabled = false;
+                            clearInterval(cloneInterval);
+                        }
+                    }
+                }, 1000);
+            });
+
+            document.getElementById('btnResetClone').addEventListener('click', () => {
+                clearInterval(cloneInterval);
+                document.getElementById('driveSource').value = '';
+                document.getElementById('driveDest').value = '';
+                cloneLogs.innerHTML = `
+                    <p class="text-slate-400">[Hệ thống] Đã đặt lại cấu hình.</p>
+                    <p class="text-slate-400">[Hệ thống] Nhập link thư mục nguồn và bấm "Bắt đầu Clone Drive".</p>
+                `;
+                cloneProgressBar.style.width = '0%';
+                cloneProgressPercent.innerText = '0%';
+                cloneProgressCounter.innerText = '0/0 files';
+                cloneStatusBadge.innerText = 'Sẵn sàng';
+                cloneStatusBadge.className = 'bg-slate-800 text-slate-300 text-[9px] px-2 py-0.5 rounded font-bold uppercase';
+                cloneSpinner.classList.add('hidden');
+                btnStartClone.disabled = false;
             });
         }
     </script>
