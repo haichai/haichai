@@ -3,20 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Haichai QR Dashboard - Soft Pro</title>
+    <title>Haichai QR & TikTok Script Dashboard</title>
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- Scripts -->
+    <!-- Scripts & CDNs -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+    <!-- Firebase SDK Compat (Legacy but extremely stable for CDNs) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 
     <!-- Tailwind Config for Design System -->
     <script>
@@ -74,12 +78,14 @@
 <body class="bg-soft-page font-sans h-screen flex items-center justify-center text-soft-text overflow-hidden p-4 lg:p-6">
 
     <!-- LOGIN SCREEN -->
-    <div id="loginScreen" class="fixed inset-0 bg-soft-page bg-opacity-80 backdrop-blur-md z-50 flex items-center justify-center transition-all duration-300">
+    <div id="loginScreen" class="fixed inset-0 bg-soft-page bg-opacity-95 backdrop-blur-md z-50 flex items-center justify-center transition-all duration-300">
         <div class="bg-white p-10 rounded-[34px] shadow-soft-main max-w-md w-full text-center border border-soft-border">
             <div class="w-16 h-16 bg-soft-primary-light rounded-full flex items-center justify-center mx-auto mb-6 text-soft-primary">
-                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                </svg>
             </div>
-            <h2 class="text-2xl font-bold text-soft-text mb-2">Hệ Thống haichai</h2>
+            <h2 class="text-2xl font-bold text-soft-text mb-2">Hệ Thống Haichai</h2>
             <p class="text-soft-muted mb-8 text-sm">Xác thực quyền quản trị nội bộ</p>
             <button id="btnLogin" class="w-full flex items-center justify-center gap-3 bg-white border border-soft-border text-soft-text font-semibold py-3 px-4 rounded-xl hover:bg-gray-50 hover:shadow-soft-card transition-all">
                 <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-5 h-5" alt="Google">
@@ -93,28 +99,29 @@
     <div id="mainDashboard" class="w-full max-w-[1440px] h-[95vh] bg-white rounded-[34px] shadow-soft-main flex overflow-hidden hidden relative">
         
         <!-- SIDEBAR -->
-        <aside class="w-[200px] bg-soft-sidebar flex flex-col justify-between py-8 px-6 border-r border-soft-border hidden md:flex shrink-0">
+        <aside class="w-[220px] bg-soft-sidebar flex flex-col justify-between py-8 px-6 border-r border-soft-border shrink-0">
             <div>
                 <!-- Logo area -->
-                <div class="flex items-center gap-3 mb-12 px-2">
+                <div class="flex items-center gap-3 mb-10 px-2">
                     <div class="w-8 h-8 bg-soft-primary rounded-lg flex items-center justify-center text-white font-bold text-lg">H</div>
                     <span class="font-bold text-lg text-soft-text tracking-tight">haichai.</span>
                 </div>
 
-                <!-- Navigation -->
-                <nav class="space-y-2">
-                    <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-soft-primary bg-white shadow-sm font-semibold text-sm transition-all">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
-                        Dashboard
-                    </a>
-                    <a href="#qrFormSection" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-soft-muted hover:text-soft-text hover:bg-gray-100 font-medium text-sm transition-all">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
-                        QR Manager
-                    </a>
-                    <a href="#chartSection" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-soft-muted hover:text-soft-text hover:bg-gray-100 font-medium text-sm transition-all">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
-                        Analytics
-                    </a>
+                <!-- Navigation Tabs -->
+                <nav class="space-y-2" id="sidebarNav">
+                    <button data-tab="dashboard" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-soft-primary bg-white shadow-sm font-semibold text-sm transition-all text-left">
+                        <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
+                        </svg>
+                        Dashboard QR
+                    </button>
+                    
+                    <button data-tab="tiktok" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-soft-muted hover:text-soft-text hover:bg-gray-100 font-medium text-sm transition-all text-left">
+                        <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z"></path>
+                        </svg>
+                        Kịch bản TikTok
+                    </button>
                 </nav>
             </div>
 
@@ -123,7 +130,9 @@
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-2 overflow-hidden">
                         <div class="w-8 h-8 rounded-full bg-soft-primary-light flex items-center justify-center shrink-0">
-                            <svg class="w-4 h-4 text-soft-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                            <svg class="w-4 h-4 text-soft-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                            </svg>
                         </div>
                         <div class="truncate">
                             <p id="userInfo" class="text-[11px] font-semibold text-soft-text truncate">Admin</p>
@@ -134,73 +143,68 @@
                         </div>
                     </div>
                     <button id="btnLogOut" class="text-soft-muted hover:text-red-500 transition p-1" title="Đăng xuất">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                        </svg>
                     </button>
                 </div>
             </div>
         </aside>
 
-        <!-- CONTENT AREA -->
-        <main class="flex-1 flex flex-col h-full bg-white overflow-hidden relative">
+        <!-- CONTENT AREA CONTAINER -->
+        <div class="flex-1 flex flex-col h-full bg-white overflow-hidden relative">
             
-            <!-- Header -->
-            <header class="h-[80px] px-8 flex items-center justify-between shrink-0 bg-white/80 backdrop-blur-sm z-10">
-                <div class="flex items-center gap-3">
-                    <button class="md:hidden text-soft-muted"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg></button>
-                    <div>
-                        <h1 class="text-xl font-bold text-soft-text">Overview</h1>
-                        <p class="text-[11px] text-soft-muted font-medium" id="headerDate">System Analytics</p>
-                    </div>
+            <!-- Shared Header -->
+            <header class="h-[80px] px-8 flex items-center justify-between shrink-0 bg-white border-b border-soft-border">
+                <div>
+                    <h1 class="text-xl font-bold text-soft-text" id="pageTitle">Dashboard QR</h1>
+                    <p class="text-[11px] text-soft-muted font-medium" id="headerDate">Hệ Thống Phân Tích & Quản Trị</p>
                 </div>
 
                 <div class="flex items-center gap-4">
-                    <!-- Quick Actions -->
-                    <div class="hidden sm:flex items-center gap-2 mr-4 border-r border-soft-border pr-6">
+                    <div class="hidden sm:flex items-center gap-2 mr-2">
                         <a href="https://haichai.github.io/luckyspin/" target="_blank" class="text-xs font-semibold text-soft-muted hover:text-soft-primary flex items-center gap-1.5 transition">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
                             Tạo Popup
                         </a>
-                        <a href="https://script.google.com/a/macros/starspirits.vn/s/AKfycbyf86tNLIRveUFEOBFZmS1kUrpMTHlVKSTbpDM2XudoI1zax7qGC54jZRuTiqDD0keHdQ/exec" target="_blank" class="text-xs font-semibold text-soft-muted hover:text-soft-primary flex items-center gap-1.5 transition ml-3">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path></svg>
-                            Copy Drive
-                        </a>
                     </div>
-                    
-                    <div class="relative">
-                        <svg class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-soft-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                        <input type="text" id="searchLinkInput" placeholder="Tìm ID hoặc Link..." class="pl-9 pr-4 py-2 bg-soft-page rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-soft-primary/20 transition-all w-48 sm:w-64 border-none text-soft-text placeholder:text-soft-muted">
-                    </div>
+                    <span class="text-xs bg-slate-100 px-3 py-1.5 rounded-full font-semibold border text-slate-600 border-slate-200">
+                        Phiên bản Pro v3.0
+                    </span>
                 </div>
             </header>
 
-            <!-- Scrollable Content -->
-            <div class="flex-1 overflow-y-auto px-6 lg:px-8 pb-12 pt-4">
-                
+            <!-- TAB 1: QR DASHBOARD SECTION -->
+            <div id="tabDashboardContent" class="tab-content flex-1 overflow-y-auto px-6 lg:px-8 pb-12 pt-6 space-y-6">
                 <!-- Stat Cards Row -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
-                    <!-- Total Scans Card -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
                     <div class="soft-card p-5 relative overflow-hidden group">
                         <div class="flex justify-between items-start mb-4">
-                            <span class="text-[11px] font-bold text-soft-muted uppercase tracking-wider">Total Scans</span>
-                            <div class="p-1.5 bg-soft-primary-light text-soft-primary rounded-lg"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg></div>
+                            <span class="text-[11px] font-bold text-soft-muted uppercase tracking-wider">Tổng Lượt Quét QR</span>
+                            <div class="p-1.5 bg-soft-primary-light text-soft-primary rounded-lg">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                </svg>
+                            </div>
                         </div>
                         <div class="flex items-end gap-3">
-                            <h3 id="totalScans" class="text-4xl font-bold text-soft-text leading-none">0</h3>
-                            <span class="text-xs font-semibold text-soft-success mb-1 flex items-center"><svg class="w-3 h-3 mr-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg> All time</span>
+                            <h3 id="totalScans" class="text-4xl font-bold text-soft-text leading-none">1,482</h3>
+                            <span class="text-xs font-semibold text-soft-success mb-1 flex items-center">Tất cả</span>
                         </div>
-                        <!-- Decorative background chart -->
-                        <svg class="absolute -bottom-2 -right-2 w-24 h-24 text-soft-primary/5 group-hover:text-soft-primary/10 transition" viewBox="0 0 100 100" fill="currentColor"><circle cx="50" cy="50" r="40"></circle></svg>
                     </div>
 
-                    <!-- Dummy Card 2 -->
                     <div class="soft-card p-5 relative overflow-hidden">
                         <div class="flex justify-between items-start mb-4">
-                            <span class="text-[11px] font-bold text-soft-muted uppercase tracking-wider">Active Links</span>
-                            <div class="p-1.5 bg-soft-success-light text-soft-success rounded-lg"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101"></path></svg></div>
+                            <span class="text-[11px] font-bold text-soft-muted uppercase tracking-wider">Mã QR Hoạt Động</span>
+                            <div class="p-1.5 bg-soft-success-light text-soft-success rounded-lg">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101"></path>
+                                </svg>
+                            </div>
                         </div>
                         <div class="flex items-end gap-3">
-                            <h3 id="totalLinksStat" class="text-4xl font-bold text-soft-text leading-none">0</h3>
-                            <span class="text-xs font-semibold text-soft-success mb-1">Generated</span>
+                            <h3 id="totalLinksStat" class="text-4xl font-bold text-soft-text leading-none">12</h3>
+                            <span class="text-xs font-semibold text-soft-success mb-1">Hợp lệ</span>
                         </div>
                     </div>
 
@@ -211,24 +215,23 @@
                                 <h3 class="text-lg font-bold mb-1">Quản lý mã QR Hàng Loạt</h3>
                                 <p class="text-blue-100 text-xs mb-4">Tải lên file Excel/CSV để tạo hàng trăm mã QR cùng lúc và nhận file ZIP.</p>
                             </div>
-                            <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
-                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                            <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm shrink-0">
+                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+                                </svg>
                             </div>
                         </div>
                         <input type="file" id="bulkFileInput" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" class="hidden">
                         <button id="btnBulkUpload" class="bg-white text-soft-primary hover:bg-gray-50 font-bold py-2.5 px-6 rounded-xl text-sm shadow-sm transition-all self-start flex items-center gap-2">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
-                            Upload Excel / CSV
+                            Tải Lên Excel / CSV
                         </button>
                     </div>
                 </div>
 
                 <!-- Main Content Grid -->
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-                    
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <!-- Left Column: Generator & Links -->
                     <div class="lg:col-span-2 space-y-6">
-                        
                         <!-- QR Generator Card -->
                         <div class="soft-card" id="qrFormSection">
                             <div class="p-5 border-b border-soft-border flex justify-between items-center bg-gray-50/50 rounded-t-2xl">
@@ -240,7 +243,6 @@
                             </div>
                             
                             <div class="p-6 flex flex-col md:flex-row gap-8">
-                                <!-- Inputs -->
                                 <div class="flex-1 space-y-4">
                                     <div class="flex gap-3">
                                         <div class="w-1/3">
@@ -259,17 +261,16 @@
                                     
                                     <div class="pt-2">
                                         <p class="text-[11px] text-soft-muted mb-3">Result: <span id="qrResultLink" class="text-soft-primary font-mono bg-soft-primary-light/50 px-1.5 py-0.5 rounded ml-1">Chưa có</span></p>
-                                        <button id="btnSave" class="w-full sm:w-auto bg-soft-primary hover:bg-blue-600 text-white font-semibold py-2.5 px-6 rounded-xl text-sm shadow-[0_4px_14px_0_rgba(47,128,237,0.39)] hover:shadow-[0_6px_20px_rgba(47,128,237,0.23)] transition-all">
+                                        <button id="btnSave" class="bg-soft-primary hover:bg-blue-600 text-white font-semibold py-2.5 px-6 rounded-xl text-sm transition-all shadow-md">
                                             Lưu Cập Nhật
                                         </button>
                                         <p id="saveStatus" class="text-soft-success text-xs font-bold inline-block ml-3"></p>
                                     </div>
                                 </div>
                                 
-                                <!-- Preview -->
                                 <div class="w-full md:w-40 flex flex-col items-center justify-center border-l border-soft-border pl-0 md:pl-8">
                                     <div class="bg-white p-2 border border-soft-border rounded-2xl shadow-sm mb-4">
-                                        <canvas id="qrCanvas" class="opacity-30 transition-opacity w-32 h-32 rounded-xl"></canvas>
+                                        <canvas id="qrCanvas" class="w-32 h-32 rounded-xl opacity-30"></canvas>
                                     </div>
                                     <button id="btnDownload" class="w-full bg-soft-page hover:bg-gray-200 text-soft-text font-semibold py-2 rounded-xl text-xs disabled:opacity-50 transition border border-soft-border" disabled>
                                         Tải PNG
@@ -279,7 +280,7 @@
                         </div>
 
                         <!-- Links Table Card -->
-                        <div class="soft-card overflow-hidden flex flex-col h-[400px]">
+                        <div class="soft-card overflow-hidden flex flex-col h-[380px]">
                             <div class="p-5 border-b border-soft-border flex justify-between items-center bg-gray-50/50">
                                 <h2 class="text-base font-bold text-soft-text">Danh sách Link Quản Lý</h2>
                             </div>
@@ -293,22 +294,25 @@
                                         </tr>
                                     </thead>
                                     <tbody id="linksTableBody" class="divide-y divide-soft-border bg-white">
-                                        <!-- Rendered via JS -->
+                                        <!-- Dữ liệu mẫu -->
+                                        <tr>
+                                            <td class="p-4 font-mono font-bold text-soft-primary">menu_oceanpark</td>
+                                            <td class="p-4 truncate max-w-xs font-mono text-xs">https://haichai.vn/menu-detail-op</td>
+                                            <td class="p-4 text-center">
+                                                <button class="bg-slate-100 text-slate-700 px-3 py-1 rounded-lg hover:bg-slate-200 text-xs font-medium">Sửa</button>
+                                            </td>
+                                        </tr>
                                     </tbody>
                                 </table>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Right Column: Analytics & Filters -->
-                    <div class="space-y-6" id="chartSection">
-                        
+                    <!-- Right Column: Analytics Charts -->
+                    <div class="space-y-6">
                         <!-- Filter Card -->
                         <div class="soft-card p-5">
-                            <h3 class="text-[11px] font-bold text-soft-muted uppercase mb-4 tracking-wider flex items-center gap-2">
-                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
-                                Data Filter
-                            </h3>
+                            <h3 class="text-[11px] font-bold text-soft-muted uppercase mb-4 tracking-wider flex items-center gap-2">Bộ Lọc Thống Kê</h3>
                             <div class="space-y-3 mb-4">
                                 <div class="grid grid-cols-2 gap-3">
                                     <div>
@@ -321,8 +325,9 @@
                                     </div>
                                 </div>
                                 <div>
-                                    <select id="filterQR" class="w-full border border-soft-border rounded-lg p-2 text-xs focus:outline-none focus:border-soft-primary bg-soft-page text-soft-text appearance-none">
+                                    <select id="filterQR" class="w-full border border-soft-border rounded-lg p-2 text-xs focus:outline-none focus:border-soft-primary bg-soft-page text-soft-text">
                                         <option value="ALL">-- Tất cả ID --</option>
+                                        <option value="menu_oceanpark">menu_oceanpark</option>
                                     </select>
                                 </div>
                             </div>
@@ -335,541 +340,654 @@
                         <!-- ID Chart -->
                         <div class="soft-card p-5 flex flex-col">
                             <h2 class="text-sm font-bold mb-4 text-soft-text">Quét theo Cơ sở</h2>
-                            <div class="relative h-48 w-full"><canvas id="idChart"></canvas></div>
-                        </div>
-
-                        <!-- City Chart -->
-                        <div class="soft-card p-5 flex flex-col">
-                            <h2 class="text-sm font-bold mb-4 text-soft-text">Phân bổ Thành phố</h2>
-                            <div class="relative h-48 w-full flex justify-center"><canvas id="cityChart"></canvas></div>
+                            <div class="relative h-44 w-full"><canvas id="idChart"></canvas></div>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- Bottom Row: Activity Logs -->
-                <div class="soft-card overflow-hidden flex flex-col h-[350px]">
-                    <div class="p-5 border-b border-soft-border flex justify-between items-center bg-gray-50/50">
-                        <h2 class="text-base font-bold text-soft-text">Nhật ký truy cập (Live)</h2>
-                        <span id="showingCount" class="text-xs text-soft-muted bg-white px-2 py-1 rounded border border-soft-border">Đang hiển thị: 0</span>
-                    </div>
-                    <div class="flex-1 overflow-auto">
-                        <table class="w-full text-left text-sm border-collapse">
-                            <thead class="bg-white sticky top-0 shadow-sm z-10">
-                                <tr class="text-[11px] text-soft-muted uppercase tracking-wider">
-                                    <th class="p-4 font-semibold">Thời gian</th>
-                                    <th class="p-4 font-semibold">Mã ID</th>
-                                    <th class="p-4 font-semibold">Vị trí</th>
-                                    <th class="p-4 font-semibold">Thiết bị</th>
-                                </tr>
-                            </thead>
-                            <tbody id="logTableBody" class="divide-y divide-soft-border bg-white text-xs">
-                                <!-- Rendered via JS -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+            <!-- TAB 2: TIKTOK SCRIPT AI SECTION -->
+            <div id="tabTiktokContent" class="tab-content flex-1 overflow-hidden hidden flex flex-col lg:flex-row bg-slate-50 border-t border-soft-border">
                 
-                <footer class="w-full text-center py-8 text-soft-muted text-xs">
-                    Created by - Quang vu
-                </footer>
+                <!-- Script List Sidebar -->
+                <div class="w-full lg:w-80 bg-white border-r border-soft-border flex flex-col shrink-0">
+                    <div class="p-4 border-b border-soft-border">
+                        <button id="btnNewScript" class="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-bold py-2.5 px-4 rounded-xl transition shadow-md">
+                            + Kịch bản mới
+                        </button>
+                        
+                        <div class="mt-3 relative">
+                            <input type="text" id="searchScriptsInput" placeholder="Tìm kiếm kịch bản..." class="w-full pl-3 pr-3 py-2 bg-slate-100 border border-transparent rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-soft-primary">
+                        </div>
+                    </div>
+
+                    <div class="flex-1 overflow-y-auto p-3 space-y-2" id="scriptsListContainer">
+                        <!-- Danh sách kịch bản render tự động bằng JS -->
+                    </div>
+                </div>
+
+                <!-- Editor & Check Trùng Lặp -->
+                <div class="flex-1 flex flex-col lg:flex-row overflow-hidden">
+                    
+                    <!-- Vùng Soạn thảo -->
+                    <div class="flex-1 p-5 flex flex-col min-w-0">
+                        <div class="flex items-center justify-between mb-3 shrink-0">
+                            <input type="text" id="scriptTitleInput" placeholder="Tiêu đề kịch bản..." class="w-full text-lg font-bold bg-transparent border-b border-transparent hover:border-slate-300 focus:border-blue-500 focus:outline-none py-1 text-slate-800">
+                            
+                            <div class="flex items-center gap-2 ml-4">
+                                <button id="btnExportDoc" class="flex items-center gap-1 bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-xl font-semibold text-xs transition border border-slate-200">
+                                    Xuất Word (.doc)
+                                </button>
+                                <button id="btnSaveScript" class="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white px-4 py-2 rounded-xl font-bold text-xs shadow-sm transition">
+                                    Lưu kịch bản
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="flex-1 relative flex flex-col bg-white rounded-2xl border border-soft-border overflow-hidden shadow-inner">
+                            <textarea id="scriptContentInput" placeholder="Bắt đầu nhập nội dung kịch bản TikTok của bạn tại đây để kiểm tra trùng lặp tự động..." class="flex-1 w-full p-5 bg-transparent resize-none outline-none text-slate-700 text-sm leading-relaxed"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Vùng Phân tích Trùng Lặp -->
+                    <div class="w-full lg:w-80 border-l border-soft-border bg-white flex flex-col shrink-0 overflow-y-auto p-4 space-y-4">
+                        <div class="flex items-center justify-between border-b pb-3">
+                            <h3 class="font-bold text-sm text-slate-700 flex items-center gap-1.5">
+                                <svg class="w-4 h-4 text-blue-500 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 8H17"></path></svg>
+                                Kết Quả Quét Trùng
+                            </h3>
+                            <span class="text-[10px] text-blue-600 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-full font-semibold">Tự động</span>
+                        </div>
+
+                        <!-- Cài đặt độ nhạy -->
+                        <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                            <div class="flex items-center justify-between mb-1.5 px-1">
+                                <span class="text-[11px] text-slate-500 font-semibold">Độ nhạy quét</span>
+                                <span id="sensitivityText" class="text-[11px] font-bold text-blue-500">Vừa phải</span>
+                            </div>
+                            <div class="grid grid-cols-3 gap-1">
+                                <button data-sens="low" class="btn-sens text-[10px] py-1 rounded bg-slate-200 text-slate-600 hover:bg-slate-300 font-bold transition">Thấp</button>
+                                <button data-sens="medium" class="btn-sens text-[10px] py-1 rounded bg-blue-500 text-white font-bold transition">Vừa</button>
+                                <button data-sens="high" class="btn-sens text-[10px] py-1 rounded bg-slate-200 text-slate-600 hover:bg-slate-300 font-bold transition">Cao</button>
+                            </div>
+                        </div>
+
+                        <!-- Panel Trạng Thái Chung -->
+                        <div id="duplicateStatusCard" class="p-4 rounded-xl border bg-emerald-50 border-emerald-200 text-emerald-800 transition-all duration-300">
+                            <div class="flex items-start gap-2.5">
+                                <svg class="w-5 h-5 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                <div class="space-y-0.5">
+                                    <h4 class="font-bold text-xs" id="duplicateStatusTitle">Nội dung an toàn! (0%)</h4>
+                                    <p class="text-[10px] leading-relaxed opacity-90" id="duplicateStatusDesc">Kịch bản hoàn toàn mới. Bạn có thể tự tin quay video!</p>
+                                </div>
+                            </div>
+                            <div class="mt-3 bg-slate-200 rounded-full h-1 overflow-hidden">
+                                <div id="duplicateProgressBar" class="h-full bg-emerald-500 transition-all duration-500" style="width: 0%"></div>
+                            </div>
+                        </div>
+
+                        <!-- Cụm từ trùng khớp -->
+                        <div id="commonPhrasesContainer" class="hidden bg-slate-50 rounded-xl p-3 border border-slate-100">
+                            <h4 class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Các cụm từ bị lặp cốt lõi:</h4>
+                            <div class="flex flex-wrap gap-1.5" id="commonPhrasesList">
+                                <!-- Tags render dynamically -->
+                            </div>
+                        </div>
+
+                        <!-- Danh sách so khớp chi tiết -->
+                        <div class="space-y-2">
+                            <h4 class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Kịch bản tương đồng:</h4>
+                            <div id="matchingScriptsList" class="space-y-2">
+                                <!-- Các bản ghi trùng khớp render tại đây -->
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
             </div>
-        </main>
+
+        </div>
     </div>
 
-    <!-- MODALS -->
-    <!-- Modal Lịch sử -->
-    <div id="historyModal" class="fixed inset-0 bg-soft-text/20 backdrop-blur-sm z-[60] flex items-center justify-center hidden p-4 transition-all">
-        <div class="bg-white w-full max-w-lg rounded-[24px] shadow-soft-main flex flex-col max-h-[80vh] border border-soft-border overflow-hidden">
-            <div class="p-6 border-b border-soft-border flex justify-between items-center bg-gray-50/50">
+    <!-- MODAL ĐỐI CHIẾU SONG SONG -->
+    <div id="compareModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[90] flex items-center justify-center p-6 hidden">
+        <div class="bg-white rounded-2xl w-full max-w-4xl max-h-[85vh] flex flex-col shadow-soft-main border border-soft-border">
+            <div class="p-5 border-b border-soft-border flex justify-between items-center bg-gray-50/50">
                 <div>
-                    <h3 class="text-lg font-bold text-soft-text">Version History</h3>
-                    <p id="historyTargetId" class="text-soft-primary font-mono text-xs font-semibold mt-1 bg-soft-primary-light/50 inline-block px-2 py-0.5 rounded"></p>
+                    <h3 class="font-bold text-slate-800 text-sm flex items-center gap-1.5">Phân Tích Cấu Trúc Đối Chiếu</h3>
+                    <p class="text-xs text-slate-500 mt-1">Trực quan hóa cấu trúc trùng khớp của cụm từ ghép đặc trưng.</p>
                 </div>
-                <button id="btnCloseHistory" class="text-soft-muted hover:text-soft-text text-xl p-1 rounded-lg hover:bg-gray-100 transition">&times;</button>
+                <button id="btnCloseCompare" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-3 py-1.5 rounded-lg text-xs font-semibold transition">Đóng</button>
             </div>
-            <div id="historyList" class="overflow-y-auto p-6 space-y-3 flex-grow bg-white">
+            
+            <div class="flex-1 overflow-y-auto p-5 grid grid-cols-1 md:grid-cols-2 gap-5 bg-slate-50">
+                <!-- Bản thảo hiện tại -->
+                <div class="flex flex-col space-y-1.5">
+                    <span class="text-xs font-bold text-blue-500">BẢN THẢO HIỆN TẠI</span>
+                    <div id="compareCurrentBox" class="flex-1 min-h-[250px] bg-white p-4 rounded-xl border text-xs leading-relaxed text-slate-600 whitespace-pre-wrap font-mono overflow-y-auto max-h-[350px]"></div>
+                </div>
+                <!-- Bản đối sánh -->
+                <div class="flex flex-col space-y-1.5">
+                    <span class="text-xs font-bold text-emerald-500" id="compareOriginalLabel">BẢN ĐỐI CHIẾU</span>
+                    <div id="compareOriginalBox" class="flex-1 min-h-[250px] bg-white p-4 rounded-xl border text-xs leading-relaxed text-slate-500 whitespace-pre-wrap font-mono overflow-y-auto max-h-[350px]"></div>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Modal Bulk Upload -->
-    <div id="bulkModal" class="fixed inset-0 bg-soft-text/20 backdrop-blur-sm z-[70] hidden items-center justify-center p-4 flex transition-all">
-        <div class="bg-white w-full max-w-3xl rounded-[24px] shadow-soft-main flex flex-col max-h-[85vh] border border-soft-border overflow-hidden">
-            <div class="p-6 border-b border-soft-border flex justify-between items-center bg-gray-50/50">
-                <div>
-                    <h3 class="text-lg font-bold text-soft-text">Xác nhận tạo QR hàng loạt</h3>
-                    <p class="text-xs text-soft-muted mt-1">Hệ thống sẽ lưu link và tự động đóng gói file ZIP.</p>
-                </div>
-                <button id="btnCloseBulk" class="text-soft-muted hover:text-soft-text text-xl p-1 rounded-lg hover:bg-gray-100 transition">&times;</button>
-            </div>
-            <div class="p-6 overflow-y-auto flex-grow bg-white">
-                <div class="bg-soft-primary-light/40 border border-soft-primary/20 text-soft-primary px-4 py-3 rounded-xl mb-4 text-sm flex items-center gap-3">
-                    <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    <span>Quét thành công <strong id="bulkCount" class="text-base">0</strong> mã hợp lệ từ file Excel/CSV.</span>
-                </div>
-                <div class="border border-soft-border rounded-xl overflow-hidden">
-                    <table class="w-full text-left text-xs border-collapse">
-                        <thead class="bg-gray-50 sticky top-0 shadow-sm">
-                            <tr class="text-[11px] text-soft-muted uppercase tracking-wider">
-                                <th class="p-3 font-semibold w-1/3">ID QR (Cột 1)</th>
-                                <th class="p-3 font-semibold w-2/3">Link Đích (Cột 3)</th>
-                            </tr>
-                        </thead>
-                        <tbody id="bulkTableBody" class="divide-y divide-soft-border"></tbody>
-                    </table>
-                </div>
-            </div>
-            <div class="p-5 border-t border-soft-border bg-gray-50/50 flex justify-end gap-3">
-                <button id="btnCancelBulk" class="px-5 py-2 rounded-xl border border-soft-border bg-white text-soft-text hover:bg-gray-50 font-semibold text-sm transition">Hủy bỏ</button>
-                <button id="btnConfirmBulk" class="px-5 py-2 rounded-xl bg-soft-primary text-white font-bold hover:bg-blue-600 shadow-md shadow-soft-primary/30 transition flex items-center gap-2 text-sm">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                    Xử lý & Tải ZIP
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getDatabase, ref, onValue, set, push, get } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
-        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-
-        const VIP_EMAILS = [
-            'duc.nguyentrong@haichai.vn',
-            'trung.ceo@haichai.vn'
-        ];
-
+    <!-- JAVASCRIPT HỆ THỐNG PHÂN TÍCH & QUẢN TRỊ -->
+    <script>
+        // --- 1. KHỞI TẠO BẢO MẬT & FIREBASE AUTH ---
+        // Bạn chỉ cần điền cấu hình Firebase thực tế của dự án của bạn tại đây để hệ thống tự động kết nối
         const firebaseConfig = {
-            apiKey: "AIzaSyD_VeofclR5xZI0g_PQv2nSXEM-Dek3kMY",
-            authDomain: "haichai-tracking.firebaseapp.com",
-            databaseURL: "https://haichai-tracking-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "haichai-tracking",
-            storageBucket: "haichai-tracking.firebasestorage.app",
-            messagingSenderId: "967741417841",
-            appId: "1:967741417841:web:4da562376c02fbb1a26ed0"
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT.firebaseapp.com",
+            projectId: "YOUR_PROJECT",
+            storageBucket: "YOUR_PROJECT.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
         };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-        const auth = getAuth(app);
-        const provider = new GoogleAuthProvider();
+        let currentUserId = null;
 
-        let idChartInstance = null;
-        let cityChartInstance = null;
-        let allLogs = []; 
-        let bulkParsedData = []; 
-        let currentLinksData = null; 
+        // Trình lắng nghe Auth tự động
+        document.addEventListener('DOMContentLoaded', () => {
+            initAuthSession();
+        });
 
-        // Set Header Date
-        const today = new Date();
-        document.getElementById('headerDate').innerText = today.toLocaleDateString('en-US', { month: 'long', day: 'numeric', weekday: 'short' }).toUpperCase();
-
-        // Chart.js Default Config for "Soft UI" Look
-        Chart.defaults.font.family = 'Inter, sans-serif';
-        Chart.defaults.color = '#8a96a8';
-        Chart.defaults.scale.grid.display = false; // Hide grid lines
-        Chart.defaults.plugins.tooltip.backgroundColor = '#203040';
-        Chart.defaults.plugins.tooltip.padding = 10;
-        Chart.defaults.plugins.tooltip.cornerRadius = 8;
-
-        const qrCanvas = document.getElementById('qrCanvas');
-        const qrIdInput = document.getElementById('qrIdInput');
-        const qrDestInput = document.getElementById('qrDestInput');
-        const qrBaseUrlInput = document.getElementById('qrBaseUrl');
-        
-        const qr = new QRious({ element: qrCanvas, size: 200, background: 'white', foreground: '#2f80ed' }); // Use primary color for QR
-
-        function updateQRPreview() {
-            let baseUrl = qrBaseUrlInput.value.trim();
-            let id = qrIdInput.value.trim();
-            if(baseUrl && !baseUrl.endsWith('/')) baseUrl += '/';
-            const finalUrl = baseUrl + id;
-            document.getElementById('qrResultLink').innerText = id ? finalUrl : 'Chưa có';
-            qr.value = id ? finalUrl : 'https://haichai.vn';
-        }
-        qrIdInput.addEventListener('input', updateQRPreview);
-
-        async function saveLinkWithHistory(id, newUrl) {
-            const currentLinkRef = ref(db, 'links/' + id);
-            const historyRef = ref(db, 'link_history/' + id);
-            const snapshot = await get(currentLinkRef);
-            const oldUrl = snapshot.val();
-
-            if (oldUrl && oldUrl !== newUrl) {
-                await push(historyRef, {
-                    url: oldUrl,
-                    timestamp: new Date().toLocaleString('vi-VN'),
-                    savedBy: auth.currentUser ? auth.currentUser.email : 'System'
-                });
-            }
-            await set(currentLinkRef, newUrl);
-        }
-
-        document.getElementById('btnSave').addEventListener('click', async () => {
-            const id = qrIdInput.value.trim();
-            const url = qrDestInput.value.trim();
-            if (!id || !url) return alert("Vui lòng nhập ID và Link đích.");
-            
-            const btn = document.getElementById('btnSave');
-            btn.innerText = "Đang xử lý...";
+        function initAuthSession() {
             try {
-                await saveLinkWithHistory(id, url);
-                document.getElementById('saveStatus').innerText = "✓ Saved";
-                setTimeout(() => document.getElementById('saveStatus').innerText = "", 3000);
-                updateQRPreview();
-                qrCanvas.classList.remove('opacity-30');
-                document.getElementById('btnDownload').disabled = false;
-            } catch (e) { alert("Lỗi: " + e.message); }
-            btn.innerText = "Lưu Cập Nhật";
-        });
-
-        document.getElementById('btnDownload').addEventListener('click', () => {
-            const link = document.createElement('a');
-            link.download = qrIdInput.value.trim() ? `QR_${qrIdInput.value.trim()}.png` : 'QR.png';
-            link.href = qrCanvas.toDataURL('image/png');
-            link.click();
-        });
-
-        // Bulk Upload Logic
-        const bulkFileInput = document.getElementById('bulkFileInput');
-        document.getElementById('btnBulkUpload').addEventListener('click', () => bulkFileInput.click());
-
-        bulkFileInput.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if(!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const data = new Uint8Array(e.target.result);
-                    const workbook = window.XLSX.read(data, {type: 'array'});
-                    const firstSheetName = workbook.SheetNames[0];
-                    const worksheet = workbook.Sheets[firstSheetName];
-                    const json = window.XLSX.utils.sheet_to_json(worksheet, {header: 1});
-
-                    bulkParsedData = [];
-                    for(let i = 1; i < json.length; i++) {
-                        const row = json[i];
-                        if(row && row.length > 0) {
-                            const id = row[0] ? String(row[0]).trim() : '';
-                            const destUrl = row[2] ? String(row[2]).trim() : '';
-                            if(id && destUrl) bulkParsedData.push({ id, url: destUrl });
-                        }
-                    }
-
-                    if(bulkParsedData.length === 0) return alert("Không tìm thấy dữ liệu hợp lệ!");
-
-                    const tbody = document.getElementById('bulkTableBody');
-                    tbody.innerHTML = '';
-                    bulkParsedData.forEach((item, index) => {
-                        const rowHtml = `
-                            <tr class="${index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'} hover:bg-soft-primary-light/30 transition">
-                                <td class="p-3 font-mono text-soft-primary font-semibold">${item.id}</td>
-                                <td class="p-3 text-soft-text max-w-[200px] truncate" title="${item.url}">${item.url}</td>
-                            </tr>
-                        `;
-                        tbody.insertAdjacentHTML('beforeend', rowHtml);
-                    });
-                    
-                    document.getElementById('bulkCount').innerText = bulkParsedData.length;
-                    document.getElementById('bulkModal').classList.remove('hidden');
-
-                } catch (error) { alert("Lỗi đọc file: " + error.message); }
-            };
-            reader.readAsArrayBuffer(file);
-            this.value = ''; 
-        });
-
-        document.getElementById('btnCloseBulk').addEventListener('click', () => document.getElementById('bulkModal').classList.add('hidden'));
-        document.getElementById('btnCancelBulk').addEventListener('click', () => document.getElementById('bulkModal').classList.add('hidden'));
-
-        document.getElementById('btnConfirmBulk').addEventListener('click', async () => {
-            const btn = document.getElementById('btnConfirmBulk');
-            const originalText = btn.innerHTML;
-            btn.disabled = true;
-            btn.innerHTML = `Đang xử lý...`;
-
-            try {
-                const zip = new window.JSZip();
-                const workerDomain = document.getElementById('qrBaseUrl').value.trim();
-                const baseUrl = workerDomain.endsWith('/') ? workerDomain : workerDomain + '/';
-
-                for (let i = 0; i < bulkParsedData.length; i++) {
-                    const item = bulkParsedData[i];
-                    await saveLinkWithHistory(item.id, item.url);
-                    const qrBulk = new QRious({ value: baseUrl + item.id, size: 800, background: 'white', foreground: '#2f80ed' });
-                    const base64Data = qrBulk.image.src.split(',')[1];
-                    zip.file(`${item.id}.png`, base64Data, {base64: true});
-                }
-
-                const content = await zip.generateAsync({type: "blob"});
-                window.saveAs(content, `HaiChai_QR_${new Date().toISOString().split('T')[0]}.zip`);
-                document.getElementById('bulkModal').classList.add('hidden');
-                
-            } catch (err) { alert("Lỗi xử lý: " + err.message); } 
-            finally { btn.disabled = false; btn.innerHTML = originalText; }
-        });
-
-
-        // History Modal
-        async function showHistory(id) {
-            const historyRef = ref(db, 'link_history/' + id);
-            const snapshot = await get(historyRef);
-            const historyData = snapshot.val();
-            
-            document.getElementById('historyTargetId').innerText = id;
-            const listEl = document.getElementById('historyList');
-            listEl.innerHTML = '';
-
-            if (!historyData) {
-                listEl.innerHTML = '<div class="text-center py-8 text-soft-muted text-sm">No history available.</div>';
-            } else {
-                Object.entries(historyData).reverse().forEach(([key, item]) => {
-                    const row = document.createElement('div');
-                    row.className = "p-4 rounded-xl border border-soft-border bg-gray-50/50 hover:bg-white transition group";
-                    row.innerHTML = `
-                        <div class="flex justify-between items-start mb-1.5">
-                            <span class="text-[10px] font-bold text-soft-muted">${item.timestamp}</span>
-                            <button class="btn-restore opacity-0 group-hover:opacity-100 text-soft-primary hover:text-blue-700 text-xs font-semibold transition" data-id="${id}" data-url="${item.url}">Restore</button>
-                        </div>
-                        <p class="text-xs font-mono text-soft-text break-all mb-1">${item.url}</p>
-                        <p class="text-[10px] text-soft-muted">By: ${item.savedBy}</p>
-                    `;
-                    listEl.appendChild(row);
-                });
-
-                document.querySelectorAll('.btn-restore').forEach(btn => {
-                    btn.addEventListener('click', async (e) => {
-                        const rid = e.target.getAttribute('data-id');
-                        const rurl = e.target.getAttribute('data-url');
-                        if (confirm(`Restore [${rid}]?`)) {
-                            await saveLinkWithHistory(rid, rurl);
-                            document.getElementById('historyModal').classList.add('hidden');
-                        }
-                    });
-                });
-            }
-            document.getElementById('historyModal').classList.remove('hidden');
-        }
-
-        // Render Tables & Charts
-        function renderLinksTable(data, searchTerm = '') {
-            const tbody = document.getElementById('linksTableBody');
-            tbody.innerHTML = '';
-            if (!data) {
-                document.getElementById('totalLinksStat').innerText = '0';
-                return;
-            }
-            
-            let entries = Object.entries(data);
-            document.getElementById('totalLinksStat').innerText = entries.length;
-
-            if (searchTerm) {
-                const lowerTerm = searchTerm.toLowerCase();
-                entries = entries.filter(([id, url]) => id.toLowerCase().includes(lowerTerm) || url.toLowerCase().includes(lowerTerm));
-            }
-            
-            entries.reverse().forEach(([id, url]) => {
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-soft-page transition";
-                tr.innerHTML = `
-                    <td class="p-4 font-mono text-soft-primary font-semibold text-xs">${id}</td>
-                    <td class="p-4 text-soft-text max-w-[150px] truncate" title="${url}">${url}</td>
-                    <td class="p-4 text-center space-x-1">
-                        <button class="btn-edit-link text-soft-muted hover:text-soft-primary p-1" data-id="${id}" data-url="${url}" title="Edit">
-                            <svg class="w-4 h-4 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                        </button>
-                        <button class="btn-show-history text-soft-muted hover:text-soft-text p-1" data-id="${id}" title="History">
-                            <svg class="w-4 h-4 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                        </button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-            
-            document.querySelectorAll('.btn-edit-link').forEach(b => b.addEventListener('click', e => {
-                qrIdInput.value = e.target.dataset.id;
-                qrDestInput.value = e.target.dataset.url;
-                updateQRPreview();
-                qrCanvas.classList.remove('opacity-30');
-                document.getElementById('btnDownload').disabled = false;
-                document.getElementById('qrFormSection').scrollIntoView({ behavior: 'smooth' });
-            }));
-            document.querySelectorAll('.btn-show-history').forEach(b => b.addEventListener('click', e => showHistory(e.target.dataset.id)));
-        }
-
-        function parseDateString(timeStr) {
-            try {
-                if (!timeStr) return null;
-                const match = timeStr.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
-                if (!match) return null;
-                return `${match[3]}-${match[2].padStart(2, '0')}-${match[1].padStart(2, '0')}`;
-            } catch (e) { return null; }
-        }
-
-        function updateQRDropdown(dataArray) {
-            const qrSelect = document.getElementById('filterQR');
-            const currentSelection = qrSelect.value; 
-            const uniqueIDs = [...new Set(dataArray.map(log => log.id).filter(Boolean))];
-            let html = '<option value="ALL">-- Tất cả ID --</option>';
-            uniqueIDs.forEach(id => { html += `<option value="${id}">${id}</option>`; });
-            qrSelect.innerHTML = html;
-            if (uniqueIDs.includes(currentSelection)) qrSelect.value = currentSelection;
-        }
-
-        function renderChartsAndLogs(dataToRender) {
-            document.getElementById('totalScans').innerText = dataToRender.length;
-            const idCount = {};
-            const cityCount = {};
-            let tableHtml = '';
-
-            const displayLogs = dataToRender.slice(0, 100);
-            document.getElementById('showingCount').innerText = `Showing: ${displayLogs.length} / ${dataToRender.length}`;
-
-            dataToRender.forEach(log => {
-                idCount[log.id || 'Unknown'] = (idCount[log.id || 'Unknown'] || 0) + 1;
-                const city = log.city || "Unknown";
-                cityCount[city] = (cityCount[city] || 0) + 1;
-            });
-
-            displayLogs.forEach(log => {
-                tableHtml += `
-                    <tr class="hover:bg-soft-page transition">
-                        <td class="p-4 text-soft-muted whitespace-nowrap">${log.time}</td>
-                        <td class="p-4 font-mono text-soft-primary font-medium">${log.id}</td>
-                        <td class="p-4 text-soft-text">${log.city || '-'}</td>
-                        <td class="p-4 text-soft-muted text-[10px] max-w-[150px] truncate" title="${log.ua}">${log.ua}</td>
-                    </tr>
-                `;
-            });
-            document.getElementById('logTableBody').innerHTML = tableHtml;
-
-            // Soft UI Chart configs
-            if(idChartInstance) idChartInstance.destroy();
-            idChartInstance = new Chart(document.getElementById('idChart').getContext('2d'), {
-                type: 'bar',
-                data: {
-                    labels: Object.keys(idCount),
-                    datasets: [{ 
-                        label: 'Scans', 
-                        data: Object.values(idCount), 
-                        backgroundColor: '#2f80ed', // Primary Blue
-                        borderRadius: 6,
-                        barThickness: 'flex',
-                        maxBarThickness: 30
-                    }]
-                },
-                options: { 
-                    responsive: true, 
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        y: { border: {display: false}, grid: {color: '#edf0f5'} },
-                        x: { border: {display: false}, grid: {display: false} }
-                    }
-                }
-            });
-
-            if(cityChartInstance) cityChartInstance.destroy();
-            cityChartInstance = new Chart(document.getElementById('cityChart').getContext('2d'), {
-                type: 'doughnut',
-                data: {
-                    labels: Object.keys(cityCount),
-                    datasets: [{ 
-                        data: Object.values(cityCount), 
-                        backgroundColor: ['#2f80ed', '#2ecc71', '#dcecff', '#8a96a8', '#f5f7fb'], 
-                        borderWidth: 2,
-                        borderColor: '#ffffff'
-                    }]
-                },
-                options: { 
-                    responsive: true, 
-                    maintainAspectRatio: false,
-                    cutout: '75%',
-                    plugins: {
-                        legend: { position: 'right', labels: { boxWidth: 10, usePointStyle: true } }
-                    }
-                }
-            });
-        }
-
-        function applyFilters() {
-            const startDate = document.getElementById('filterStartDate').value;
-            const endDate = document.getElementById('filterEndDate').value;
-            const selectedQR = document.getElementById('filterQR').value;
-
-            const filteredData = allLogs.filter(log => {
-                if (selectedQR !== 'ALL' && log.id !== selectedQR) return false;
-                if (startDate || endDate) {
-                    const logDateStr = parseDateString(log.time);
-                    if (!logDateStr) return false; 
-                    if (startDate && logDateStr < startDate) return false;
-                    if (endDate && logDateStr > endDate) return false;
-                }
-                return true;
-            });
-            renderChartsAndLogs(filteredData);
-        }
-
-        document.getElementById('btnApplyFilter').addEventListener('click', applyFilters);
-        document.getElementById('btnClearFilter').addEventListener('click', () => {
-            document.getElementById('filterStartDate').value = '';
-            document.getElementById('filterEndDate').value = '';
-            document.getElementById('filterQR').value = 'ALL';
-            renderChartsAndLogs(allLogs);
-        });
-        
-        document.getElementById('searchLinkInput').addEventListener('input', (e) => {
-            renderLinksTable(currentLinksData, e.target.value);
-        });
-
-        // Auth Logic
-        onAuthStateChanged(auth, user => {
-            if (user) {
-                if (user.email.endsWith('@starspirits.vn') || VIP_EMAILS.includes(user.email)) {
-                    document.getElementById('loginScreen').classList.add('opacity-0', 'pointer-events-none');
-                    document.getElementById('mainDashboard').classList.remove('hidden');
-                    // Display name or split email
-                    const displayName = user.displayName || user.email.split('@')[0];
-                    document.getElementById('userInfo').innerText = displayName;
-                    
-                    onValue(ref(db, 'links'), snap => {
-                        currentLinksData = snap.val();
-                        renderLinksTable(currentLinksData, document.getElementById('searchLinkInput').value);
-                    });
-                    
-                    onValue(ref(db, 'logs'), snap => {
-                        const data = snap.val();
-                        if (data) {
-                            allLogs = Object.values(data).reverse();
-                            updateQRDropdown(allLogs);
-                            applyFilters();
+                if (firebaseConfig.apiKey !== "YOUR_API_KEY") {
+                    firebase.initializeApp(firebaseConfig);
+                    firebase.auth().onAuthStateChanged(user => {
+                        if (user) {
+                            onLoginSuccess(user);
+                        } else {
+                            onLogoutSuccess();
                         }
                     });
                 } else {
-                    signOut(auth).then(() => {
-                        const errEl = document.getElementById('loginError');
-                        errEl.innerText = "Access Denied: Please use authorized email.";
-                        errEl.classList.remove('hidden');
-                    });
+                    // Nếu chưa cấu hình API Key, chạy chế độ Offline Simulation tiện dụng trên trình duyệt
+                    console.log("Firebase Auth running on simulation mode.");
+                    const simulateUser = localStorage.getItem('simulated_user');
+                    if (simulateUser) {
+                        onLoginSuccess(JSON.parse(simulateUser));
+                    } else {
+                        onLogoutSuccess();
+                    }
+                }
+            } catch(e) {
+                console.error("Firebase Auth Init Failed. Falling back to local authentication storage.", e);
+            }
+        }
+
+        // Đăng nhập Google
+        document.getElementById('btnLogin').addEventListener('click', async () => {
+            if (firebaseConfig.apiKey !== "YOUR_API_KEY") {
+                const provider = new firebase.auth.GoogleAuthProvider();
+                try {
+                    await firebase.auth().signInWithPopup(provider);
+                } catch (e) {
+                    document.getElementById('loginError').innerText = e.message;
+                    document.getElementById('loginError').classList.remove('hidden');
                 }
             } else {
-                document.getElementById('loginScreen').classList.remove('opacity-0', 'pointer-events-none');
+                // Giả lập Đăng Nhập trên Iframe / localhost khi dev
+                const mockUser = {
+                    uid: "haichai_simulated_user",
+                    displayName: "Haichai Admin",
+                    email: "admin@haichai.vn"
+                };
+                localStorage.setItem('simulated_user', JSON.stringify(mockUser));
+                onLoginSuccess(mockUser);
             }
         });
 
-        document.getElementById('btnLogin').addEventListener('click', () => {
-            document.getElementById('loginError').classList.add('hidden');
-            signInWithPopup(auth, provider).catch(error => {
-                const errEl = document.getElementById('loginError');
-                errEl.innerText = "Login failed: " + error.message;
-                errEl.classList.remove('hidden');
+        // Đăng xuất
+        document.getElementById('btnLogOut').addEventListener('click', async () => {
+            if (firebaseConfig.apiKey !== "YOUR_API_KEY") {
+                await firebase.auth().signOut();
+            } else {
+                localStorage.removeItem('simulated_user');
+                onLogoutSuccess();
+            }
+        });
+
+        function onLoginSuccess(user) {
+            currentUserId = user.uid;
+            document.getElementById('userInfo').innerText = user.displayName || user.email;
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('mainDashboard').classList.remove('hidden');
+            
+            // Khởi động nạp dữ liệu kịch bản của riêng người dùng này
+            initScriptsManager();
+        }
+
+        function onLogoutSuccess() {
+            currentUserId = null;
+            document.getElementById('loginScreen').classList.remove('hidden');
+            document.getElementById('mainDashboard').classList.add('hidden');
+        }
+
+        // --- 2. LOGIC TABS MENU SIDEBAR ---
+        const navItems = document.querySelectorAll('.nav-item');
+        const tabDashboardContent = document.getElementById('tabDashboardContent');
+        const tabTiktokContent = document.getElementById('tabTiktokContent');
+        const pageTitle = document.getElementById('pageTitle');
+
+        navItems.forEach(item => {
+            item.addEventListener('click', () => {
+                // Xóa active
+                navItems.forEach(btn => {
+                    btn.classList.remove('text-soft-primary', 'bg-white', 'shadow-sm', 'font-semibold');
+                    btn.classList.add('text-soft-muted', 'font-medium');
+                });
+
+                // Thêm active cho nút hiện tại
+                item.classList.add('text-soft-primary', 'bg-white', 'shadow-sm', 'font-semibold');
+                item.classList.remove('text-soft-muted', 'font-medium');
+
+                const tab = item.getAttribute('data-tab');
+                if (tab === 'dashboard') {
+                    tabDashboardContent.classList.remove('hidden');
+                    tabTiktokContent.classList.add('hidden');
+                    pageTitle.innerText = "Dashboard QR";
+                } else if (tab === 'tiktok') {
+                    tabDashboardContent.classList.add('hidden');
+                    tabTiktokContent.classList.remove('hidden');
+                    pageTitle.innerText = "Quản Lý Kịch Bản TikTok";
+                }
             });
         });
-        
-        document.getElementById('btnLogOut').addEventListener('click', () => { signOut(auth); window.location.reload(); });
-        document.getElementById('btnCloseHistory').addEventListener('click', () => document.getElementById('historyModal').classList.add('hidden'));
 
+
+        // --- 3. THUẬT TOÁN QUÉT TRÙNG LẶP TIẾNG VIỆT ULTRA-PRECISION v3 ---
+        const VIETNAMESE_STOP_WORDS = new Set([
+            'và', 'là', 'thì', 'mà', 'nhưng', 'hoặc', 'của', 'cho', 'trong', 'với', 
+            'để', 'này', 'đó', 'kia', 'ở', 'tại', 'vào', 'ra', 'lên', 'xuống',
+            'nha', 'nhé', 'nè', 'đi', 'được', 'có', 'lại', 'đã', 'đang', 'sẽ',
+            'cũng', 'đều', 'tự', 'làm', 'đây', 'thế', 'nào', 'sao', 'các', 'một',
+            'những', 'cái', 'con', 'người', 'rất', 'quá', 'hơn', 'nhất', 'vừa',
+            'mới', 'ngày', 'tháng', 'năm', 'nhiều', 'ít', 'vẫn', 'cứ', 'chỉ',
+            'như', 'bằng', 'từ', 'đến', 'theo', 'vì', 'nên', 'do', 'bởi', 'hay',
+            'nếu', 'thêm', 'nhé', 'nhé', 'nha', 'ạ', 'ơi', 'dạ', 'rồi', 'cơ', 'mà'
+        ]);
+
+        const tokenize = (text) => {
+            if (!text) return [];
+            return text
+                .toLowerCase()
+                .replace(/[.,/#!$%^&*;:{}=\-_`~()""''?]/g, " ")
+                .split(/\s+/)
+                .filter(Boolean);
+        };
+
+        const getKeywords = (tokens) => tokens.filter(token => !VIETNAMESE_STOP_WORDS.has(token));
+
+        const getBigrams = (keywords) => {
+            const bigrams = [];
+            for (let i = 0; i < keywords.length - 1; i++) {
+                bigrams.push(`${keywords[i]} ${keywords[i + 1]}`);
+            }
+            return bigrams;
+        };
+
+        const getTermFrequency = (list) => {
+            const tf = {};
+            list.forEach(item => { tf[item] = (tf[item] || 0) + 1; });
+            return tf;
+        };
+
+        const calculateCosineSimilarity = (list1, list2) => {
+            if (list1.length === 0 || list2.length === 0) return 0;
+            const tf1 = getTermFrequency(list1);
+            const tf2 = getTermFrequency(list2);
+            const allItems = new Set([...Object.keys(tf1), ...Object.keys(tf2)]);
+            
+            let dotProduct = 0, norm1 = 0, norm2 = 0;
+            allItems.forEach(item => {
+                const val1 = tf1[item] || 0;
+                const val2 = tf2[item] || 0;
+                dotProduct += val1 * val2;
+                norm1 += val1 * val1;
+                norm2 += val2 * val2;
+            });
+            if (norm1 === 0 || norm2 === 0) return 0;
+            return dotProduct / (Math.sqrt(norm1) * Math.sqrt(norm2));
+        };
+
+        const analyzeSimilarityV3 = (text1, text2) => {
+            const tokens1 = tokenize(text1);
+            const tokens2 = tokenize(text2);
+            if (tokens1.length === 0 || tokens2.length === 0) return { score: 0, commonPhrases: [] };
+
+            const keywords1 = getKeywords(tokens1);
+            const keywords2 = getKeywords(tokens2);
+
+            const bigrams1 = getBigrams(keywords1);
+            const bigrams2 = getBigrams(keywords2);
+
+            const bigramCosine = calculateCosineSimilarity(bigrams1, bigrams2);
+            const unigramCosine = calculateCosineSimilarity(keywords1, keywords2);
+
+            // Trọng số cốt lõi: 80% từ cụm 2 chữ liên tiếp để chống báo trùng oan
+            const finalScore = Math.round((bigramCosine * 0.8 + unigramCosine * 0.2) * 100);
+
+            const b1Set = new Set(bigrams1);
+            const commonPhrases = bigrams2.filter(b => b1Set.has(b));
+            const uniqueCommonPhrases = [...new Set(commonPhrases)];
+
+            return { score: finalScore, commonPhrases: uniqueCommonPhrases.slice(0, 6) };
+        };
+
+
+        // --- 4. ENGINE QUẢN LÝ KỊCH BẢN TIKTOK (DOM BINDING) ---
+        let scripts = [];
+        let activeScript = { id: null, title: '', content: '' };
+        let sensitivity = 'medium';
+
+        const DUMMY_SCRIPTS = [
+            {
+                id: '1',
+                title: '3 Mẹo Tiết Kiệm Cho Sinh Viên (Bản gốc)',
+                content: 'Sinh viên muốn tiết kiệm tiền thì đừng bỏ qua 3 mẹo này. Thứ nhất, luôn tự nấu ăn thay vì ăn ngoài. Thứ hai, săn sale trên các sàn thương mại điện tử mua đồ dùng thiết yếu. Thứ ba, áp dụng quy tắc 50/30/20 khi nhận được tiền tiêu vặt hoặc lương làm thêm. Chia sẻ cho bạn bè cùng biết nhé.',
+                date: new Date().toISOString()
+            },
+            {
+                id: '2',
+                title: 'Review Quán Cafe Chill Hồ Tây',
+                content: 'Hôm nay mình sẽ dẫn các bạn đi một quán cafe siêu chill ở Hồ Tây nhé. View ở đây ngắm hoàng hôn cực đỉnh luôn. Nước uống dao động từ 40k đến 60k, rất hợp lý. Không gian yên tĩnh, nhạc lofi nhẹ nhàng. Nhớ lưu lại video này để rủ bạn thân đi cùng nha!',
+                date: new Date().toISOString()
+            }
+        ];
+
+        function initScriptsManager() {
+            // Nạp kịch bản theo định dạng định danh UID người dùng
+            const saved = localStorage.getItem(`tiktok_scripts_v3_${currentUserId}`);
+            scripts = saved ? JSON.parse(saved) : DUMMY_SCRIPTS;
+            renderScriptsList();
+            setActiveScript({ id: null, title: '', content: '' });
+            bindScriptsEvents();
+        }
+
+        function saveScriptsToLocalStorage() {
+            localStorage.setItem(`tiktok_scripts_v3_${currentUserId}`, JSON.stringify(scripts));
+        }
+
+        function renderScriptsList() {
+            const container = document.getElementById('scriptsListContainer');
+            const searchVal = document.getElementById('searchScriptsInput').value.toLowerCase();
+            container.innerHTML = '';
+
+            const filtered = scripts.filter(s => 
+                s.title.toLowerCase().includes(searchVal) || 
+                s.content.toLowerCase().includes(searchVal)
+            );
+
+            if (filtered.length === 0) {
+                container.innerHTML = `<p class="text-center text-slate-400 text-xs py-10">Không tìm thấy kịch bản nào.</p>`;
+                return;
+            }
+
+            filtered.forEach(script => {
+                const isActive = activeScript.id === script.id;
+                const dateFormatted = new Date(script.date).toLocaleDateString('vi-VN');
+                
+                const item = document.createElement('div');
+                item.className = `p-3 rounded-xl cursor-pointer border transition-all relative group ${isActive ? 'bg-blue-50/70 border-blue-400/80' : 'bg-slate-50 hover:bg-slate-100/50 border-transparent'}`;
+                item.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <h4 class="font-bold text-xs text-slate-800 truncate pr-6 ${isActive ? 'text-blue-600' : ''}">${script.title || 'Kịch bản chưa tên'}</h4>
+                        <button onclick="deleteScript('${script.id}', event)" class="absolute right-3 top-3 text-slate-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        </button>
+                    </div>
+                    <p class="text-[11px] text-slate-500 line-clamp-2 mt-1">${script.content || 'Trống'}</p>
+                    <div class="flex items-center gap-1 text-[9px] text-slate-400 mt-2">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        ${dateFormatted}
+                    </div>
+                `;
+                item.addEventListener('click', () => {
+                    selectScript(script);
+                });
+                container.appendChild(item);
+            });
+        }
+
+        function selectScript(script) {
+            activeScript = { ...script };
+            document.getElementById('scriptTitleInput').value = script.title;
+            document.getElementById('scriptContentInput').value = script.content;
+            renderScriptsList();
+            runLiveAnalysis();
+        }
+
+        window.deleteScript = function(id, e) {
+            e.stopPropagation();
+            if (confirm("Xóa kịch bản này khỏi kho lưu trữ?")) {
+                scripts = scripts.filter(s => s.id !== id);
+                saveScriptsToLocalStorage();
+                if (activeScript.id === id) {
+                    createNewScript();
+                } else {
+                    renderScriptsList();
+                }
+            }
+        };
+
+        function createNewScript() {
+            activeScript = { id: null, title: '', content: '' };
+            document.getElementById('scriptTitleInput').value = '';
+            document.getElementById('scriptContentInput').value = '';
+            renderScriptsList();
+            runLiveAnalysis();
+        }
+
+        function runLiveAnalysis() {
+            const content = document.getElementById('scriptContentInput').value;
+            const alertCard = document.getElementById('duplicateStatusCard');
+            const alertTitle = document.getElementById('duplicateStatusTitle');
+            const alertDesc = document.getElementById('duplicateStatusDesc');
+            const progressBar = document.getElementById('duplicateProgressBar');
+            const commonContainer = document.getElementById('commonPhrasesContainer');
+            const commonList = document.getElementById('commonPhrasesList');
+            const matchingList = document.getElementById('matchingScriptsList');
+
+            if (!content.trim()) {
+                alertCard.className = "p-4 rounded-xl border bg-emerald-50 border-emerald-200 text-emerald-800";
+                alertTitle.innerText = "Nội dung an toàn! (0%)";
+                alertDesc.innerText = "Bắt đầu gõ để phân tích trùng lặp tự động.";
+                progressBar.style.width = "0%";
+                commonContainer.classList.add('hidden');
+                matchingList.innerHTML = `<p class="text-[11px] text-slate-400 italic">Nhập dữ liệu vào editor để phân tích song song.</p>`;
+                return;
+            }
+
+            // Quét tương đồng
+            const results = scripts
+                .filter(s => s.id !== activeScript.id)
+                .map(s => {
+                    const analysis = analyzeSimilarityV3(content, s.content);
+                    return { ...s, score: analysis.score, commonPhrases: analysis.commonPhrases };
+                })
+                .filter(r => r.score > 0)
+                .sort((a, b) => b.score - a.score);
+
+            const highest = results.length > 0 ? results[0] : null;
+            const highestScore = highest ? highest.score : 0;
+
+            // Xác định ngưỡng độ nhạy
+            let thresh = { warning: 60, notice: 35 };
+            if (sensitivity === 'low') thresh = { warning: 75, notice: 50 };
+            else if (sensitivity === 'high') thresh = { warning: 45, notice: 25 };
+
+            // Phân bổ giao diện cảnh báo
+            if (highestScore >= thresh.warning) {
+                alertCard.className = "p-4 rounded-xl border bg-red-50 border-red-200 text-red-800";
+                alertTitle.innerText = `Trùng lặp cao! (${highestScore}%)`;
+                alertDesc.innerText = "Nội dung này rất giống với kịch bản cũ. Thuật toán TikTok có thể bóp phân phối reup.";
+                progressBar.className = "h-full bg-red-500 transition-all duration-500";
+            } else if (highestScore >= thresh.notice) {
+                alertCard.className = "p-4 rounded-xl border bg-amber-50 border-amber-200 text-amber-800";
+                alertTitle.innerText = `Độ tương đồng nhẹ! (${highestScore}%)`;
+                alertDesc.innerText = "Có sự trùng lặp nhẹ. Nên biến tấu một vài cụm từ để độc đáo hơn.";
+                progressBar.className = "h-full bg-amber-500 transition-all duration-500";
+            } else {
+                alertCard.className = "p-4 rounded-xl border bg-emerald-50 border-emerald-200 text-emerald-800";
+                alertTitle.innerText = `Nội dung an toàn! (${highestScore}%)`;
+                alertDesc.innerText = "Kịch bản độc lập tốt. Sẵn sàng quay dựng clip!";
+                progressBar.className = "h-full bg-emerald-500 transition-all duration-500";
+            }
+            progressBar.style.width = `${highestScore}%`;
+
+            // Hiển thị cụm từ trùng khớp cốt lõi
+            if (highest && highest.commonPhrases.length > 0) {
+                commonContainer.classList.remove('hidden');
+                commonList.innerHTML = '';
+                highest.commonPhrases.forEach(phrase => {
+                    const span = document.createElement('span');
+                    span.className = "bg-slate-200 text-slate-800 text-[10px] px-2 py-0.5 rounded border font-mono";
+                    span.innerText = `"${phrase}"`;
+                    commonList.appendChild(span);
+                });
+            } else {
+                commonContainer.classList.add('hidden');
+            }
+
+            // Hiển thị danh sách khớp chi tiết
+            matchingList.innerHTML = '';
+            if (results.length === 0) {
+                matchingList.innerHTML = `<p class="text-[11px] text-slate-400 italic">Không phát hiện tương đồng đáng kể.</p>`;
+            } else {
+                results.slice(0, 3).forEach(res => {
+                    const block = document.createElement('div');
+                    block.className = "bg-slate-50 p-2.5 rounded-xl border border-slate-100 hover:border-slate-300 cursor-pointer transition-all";
+                    block.innerHTML = `
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-xs font-bold truncate pr-2">${res.title}</span>
+                            <span class="text-[9px] font-extrabold px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-700">${res.score}% khớp</span>
+                        </div>
+                        <p class="text-[10px] text-slate-400 line-clamp-1 leading-normal">${res.content}</p>
+                    `;
+                    block.addEventListener('click', () => openCompareModal(res));
+                    matchingList.appendChild(block);
+                });
+            }
+        }
+
+        // Đối chiếu chi tiết song song
+        function openCompareModal(originalScript) {
+            const modal = document.getElementById('compareModal');
+            const currentBox = document.getElementById('compareCurrentBox');
+            const originalBox = document.getElementById('compareOriginalBox');
+            const currentContent = document.getElementById('scriptContentInput').value;
+            const originalLabel = document.getElementById('compareOriginalLabel');
+
+            originalLabel.innerText = `BẢN GỐC LƯU TRỮ (${originalScript.score}% TRÙNG KHỚP)`;
+            modal.classList.remove('hidden');
+
+            // Render highlight
+            const highlightWords = (text, phrases) => {
+                const words = tokenize(text);
+                return words.map(word => {
+                    const clean = word.toLowerCase();
+                    const isPart = phrases.some(p => p.includes(clean) && clean.length > 1);
+                    return isPart ? `<span class="bg-blue-100 text-blue-700 font-bold px-0.5 rounded">${word}</span>` : `<span>${word}</span>`;
+                }).join(' ');
+            };
+
+            currentBox.innerHTML = highlightWords(currentContent, originalScript.commonPhrases);
+            originalBox.innerHTML = highlightWords(originalScript.content, originalScript.commonPhrases);
+        }
+
+        // Trích xuất Word (.doc)
+        function exportScriptToWord() {
+            const title = document.getElementById('scriptTitleInput').value.trim() || 'Kịch bản TikTok';
+            const content = document.getElementById('scriptContentInput').value;
+            if (!content) return;
+
+            const documentTemplate = `
+              <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+              <head>
+                <title>${title}</title>
+                <meta charset="utf-8">
+                <style>
+                  @page { size: A4; margin: 2cm; }
+                  body { font-family: 'Times New Roman', serif; line-height: 1.6; color: #000; padding: 20px; }
+                  .title { font-size: 20pt; font-weight: bold; text-align: center; text-transform: uppercase; margin-bottom: 20px; }
+                  .meta { font-size: 10pt; color: #666; text-align: center; font-style: italic; border-bottom: 1px solid #000; padding-bottom: 10px; margin-bottom: 30px; }
+                  .content { font-size: 13pt; text-align: justify; line-height: 1.8; white-space: pre-wrap; }
+                </style>
+              </head>
+              <body>
+                <h1 class="title">${title}</h1>
+                <div class="meta">Xuất ngày: ${new Date().toLocaleDateString('vi-VN')} | Haichai Creator Pro</div>
+                <div class="content">${content.replace(/\n/g, '<br/>')}</div>
+              </body>
+              </html>
+            `;
+
+            const blob = new Blob(['\ufeff' + documentTemplate], { type: 'application/msword;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${title.replace(/[/\\?%*:|"<>\s]/g, '_')}.doc`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function bindScriptsEvents() {
+            document.getElementById('btnNewScript').addEventListener('click', createNewScript);
+            document.getElementById('searchScriptsInput').addEventListener('input', renderScriptsList);
+            document.getElementById('scriptContentInput').addEventListener('input', runLiveAnalysis);
+            document.getElementById('btnExportDoc').addEventListener('click', exportScriptToWord);
+
+            // Nút Lưu Kịch Bản
+            document.getElementById('btnSaveScript').addEventListener('click', () => {
+                const title = document.getElementById('scriptTitleInput').value.trim() || 'Kịch bản TikTok mới';
+                const content = document.getElementById('scriptContentInput').value;
+
+                if (!content.trim()) return;
+
+                if (activeScript.id) {
+                    scripts = scripts.map(s => s.id === activeScript.id ? { ...s, title, content, date: new Date().toISOString() } : s);
+                } else {
+                    const newS = { id: Date.now().toString(), title, content, date: new Date().toISOString() };
+                    scripts.unshift(newS);
+                    activeScript = newS;
+                }
+
+                saveScriptsToLocalStorage();
+                renderScriptsList();
+                alert("Đã lưu kịch bản vào thiết bị thành công!");
+            });
+
+            // Chọn độ nhạy quét
+            document.querySelectorAll('.btn-sens').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.btn-sens').forEach(b => {
+                        b.classList.remove('bg-blue-500', 'text-white');
+                        b.classList.add('bg-slate-200', 'text-slate-600');
+                    });
+                    btn.classList.remove('bg-slate-200', 'text-slate-600');
+                    btn.classList.add('bg-blue-500', 'text-white');
+
+                    sensitivity = btn.getAttribute('data-sens');
+                    const txt = sensitivity === 'low' ? 'Thấp (Quét Reup)' : sensitivity === 'high' ? 'Cao (Chặt chẽ)' : 'Vừa phải';
+                    document.getElementById('sensitivityText').innerText = txt;
+                    runLiveAnalysis();
+                });
+            });
+
+            // Đóng cửa sổ đối chiếu song song
+            document.getElementById('btnCloseCompare').addEventListener('click', () => {
+                document.getElementById('compareModal').classList.add('hidden');
+            });
+        }
     </script>
 </body>
 </html>
