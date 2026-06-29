@@ -1,0 +1,715 @@
+import React, { useState, useEffect, useMemo } from 'react';
+import { 
+  Search, Save, FileText, AlertTriangle, Plus, Trash2, 
+  CheckCircle2, Clock, ChevronRight, RefreshCw, 
+  Sparkles, ListCollapse, Eye, Sliders, Info, FileDown
+} from 'lucide-react';
+
+// --- BỘ LỌC TỪ CHỐNG NHIỄU TIẾNG VIỆT (DANH SÁCH MỞ RỘNG V3) ---
+const VIETNAMESE_STOP_WORDS = new Set([
+  'và', 'là', 'thì', 'mà', 'nhưng', 'hoặc', 'của', 'cho', 'trong', 'với', 
+  'để', 'này', 'đó', 'kia', 'ở', 'tại', 'vào', 'ra', 'lên', 'xuống',
+  'nha', 'nhé', 'nè', 'đi', 'được', 'có', 'lại', 'đã', 'đang', 'sẽ',
+  'cũng', 'đều', 'tự', 'làm', 'đây', 'thế', 'nào', 'sao', 'các', 'một',
+  'những', 'cái', 'con', 'người', 'rất', 'quá', 'hơn', 'nhất', 'vừa',
+  'mới', 'ngày', 'tháng', 'năm', 'nhiều', 'ít', 'vẫn', 'cứ', 'chỉ',
+  'như', 'bằng', 'từ', 'đến', 'theo', 'vì', 'nên', 'do', 'bởi', 'hay',
+  'nếu', 'thêm', 'nhé', 'nhé', 'nha', 'ạ', 'ơi', 'dạ', 'rồi', 'cơ', 'mà'
+]);
+
+// Tách từ sạch
+const tokenize = (text) => {
+  if (!text) return [];
+  return text
+    .toLowerCase()
+    .replace(/[.,/#!$%^&*;:{}=\-_`~()""''?]/g, " ")
+    .split(/\s+/)
+    .filter(Boolean);
+};
+
+// Lọc bỏ từ dừng để lấy từ khóa cốt lõi mang tính chủ đề
+const getKeywords = (tokens) => {
+  return tokens.filter(token => !VIETNAMESE_STOP_WORDS.has(token));
+};
+
+// Tạo các cụm 2 từ (Bigrams) từ danh sách từ khóa cốt lõi
+const getBigrams = (keywords) => {
+  const bigrams = [];
+  for (let i = 0; i < keywords.length - 1; i++) {
+    bigrams.push(`${keywords[i]} ${keywords[i + 1]}`);
+  }
+  return bigrams;
+};
+
+// Tính toán tần số xuất hiện (Term Frequency)
+const getTermFrequency = (list) => {
+  const tf = {};
+  list.forEach(item => {
+    tf[item] = (tf[item] || 0) + 1;
+  });
+  return tf;
+};
+
+// Tính Cosine Similarity của hai danh sách (hỗ trợ cả từ đơn và cụm từ)
+const calculateCosineSimilarity = (list1, list2) => {
+  if (list1.length === 0 || list2.length === 0) return 0;
+
+  const tf1 = getTermFrequency(list1);
+  const tf2 = getTermFrequency(list2);
+
+  const allItems = new Set([...Object.keys(tf1), ...Object.keys(tf2)]);
+
+  let dotProduct = 0;
+  let norm1 = 0;
+  let norm2 = 0;
+
+  allItems.forEach(item => {
+    const val1 = tf1[item] || 0;
+    const val2 = tf2[item] || 0;
+    dotProduct += val1 * val2;
+    norm1 += val1 * val1;
+    norm2 += val2 * val2;
+  });
+
+  if (norm1 === 0 || norm2 === 0) return 0;
+  return dotProduct / (Math.sqrt(norm1) * Math.sqrt(norm2));
+};
+
+// THUẬT TOÁN KẾT HỢP V3: Ưu tiên tối đa cụm từ cốt lõi (Bigrams) để tránh trùng lặp ảo
+const analyzeSimilarityV3 = (text1, text2) => {
+  const tokens1 = tokenize(text1);
+  const tokens2 = tokenize(text2);
+
+  if (tokens1.length === 0 || tokens2.length === 0) {
+    return { score: 0, commonPhrases: [] };
+  }
+
+  const keywords1 = getKeywords(tokens1);
+  const keywords2 = getKeywords(tokens2);
+
+  const bigrams1 = getBigrams(keywords1);
+  const bigrams2 = getBigrams(keywords2);
+
+  // Tính Cosine Similarity trên cụm 2 từ (Phát hiện trùng khớp ý tưởng cực kỳ chính xác)
+  const bigramCosine = calculateCosineSimilarity(bigrams1, bigrams2);
+  
+  // Tính Cosine Similarity trên từ đơn cốt lõi (Phòng hờ trường hợp viết lại quá nát cấu trúc)
+  const unigramCosine = calculateCosineSimilarity(keywords1, keywords2);
+
+  // Trọng số vàng: 80% dựa trên cụm từ, chỉ 20% dựa trên từ đơn lẻ 
+  // Điều này triệt tiêu hoàn toàn việc trùng lặp do dùng chung từ vựng phổ thông ở các chủ đề khác nhau!
+  const finalScore = Math.round((bigramCosine * 0.8 + unigramCosine * 0.2) * 100);
+
+  // Tìm các cụm từ trùng lặp tiêu biểu để báo cho người dùng biết cần sửa đoạn nào
+  const b1Set = new Set(bigrams1);
+  const commonPhrases = bigrams2.filter(b => b1Set.has(b));
+  const uniqueCommonPhrases = [...new Set(commonPhrases)];
+
+  return {
+    score: finalScore,
+    commonPhrases: uniqueCommonPhrases.slice(0, 6)
+  };
+};
+
+const DUMMY_SCRIPTS = [
+  {
+    id: '2',
+    title: '3 Mẹo Tiết Kiệm Cho Sinh Viên (Bản gốc)',
+    content: 'Sinh viên muốn tiết kiệm tiền thì đừng bỏ qua 3 mẹo này. Thứ nhất, luôn tự nấu ăn thay vì ăn ngoài. Thứ hai, săn sale trên các sàn thương mại điện tử mua đồ dùng thiết yếu. Thứ ba, áp dụng quy tắc 50/30/20 khi nhận được tiền tiêu vặt hoặc lương làm thêm. Chia sẻ cho bạn bè cùng biết nhé.',
+    date: new Date(Date.now() - 86400000).toISOString()
+  },
+  {
+    id: '1',
+    title: 'Review Quán Cafe Chill Hồ Tây',
+    content: 'Hôm nay mình sẽ dẫn các bạn đi một quán cafe siêu chill ở Hồ Tây nhé. View ở đây ngắm hoàng hôn cực đỉnh luôn. Nước uống dao động từ 40k đến 60k, rất hợp lý. Không gian yên tĩnh, nhạc lofi nhẹ nhàng. Nhớ lưu lại video này để rủ bạn thân đi cùng nha!',
+    date: new Date(Date.now() - 86400000 * 2).toISOString()
+  }
+];
+
+export default function App() {
+  const [scripts, setScripts] = useState(() => {
+    const saved = localStorage.getItem('tiktok_scripts_v3');
+    return saved ? JSON.parse(saved) : DUMMY_SCRIPTS;
+  });
+
+  const [activeScript, setActiveScript] = useState({ id: null, title: '', content: '' });
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedMatch, setSelectedMatch] = useState(null);
+  const [showNotification, setShowNotification] = useState(false);
+  
+  // Các mức cấu hình độ nhạy quét trùng lặp
+  const [sensitivity, setSensitivity] = useState('medium'); // 'low' | 'medium' | 'high'
+
+  useEffect(() => {
+    localStorage.setItem('tiktok_scripts_v3', JSON.stringify(scripts));
+  }, [scripts]);
+
+  const filteredScripts = scripts.filter(s => 
+    s.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    s.content.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  // Tính toán trùng lặp thời gian thực với công cụ phân tích V3 mới
+  const similarityResults = useMemo(() => {
+    if (!activeScript.content.trim()) return [];
+    
+    return scripts
+      .filter(s => s.id !== activeScript.id)
+      .map(s => {
+        const analysis = analyzeSimilarityV3(activeScript.content, s.content);
+        return {
+          ...s,
+          score: analysis.score,
+          commonPhrases: analysis.commonPhrases
+        };
+      })
+      .filter(result => result.score > 0)
+      .sort((a, b) => b.score - a.score);
+  }, [activeScript.content, activeScript.id, scripts]);
+
+  const highestMatch = similarityResults.length > 0 ? similarityResults[0] : null;
+  const highestScore = highestMatch ? highestMatch.score : 0;
+
+  // Ngưỡng cảnh báo động theo cài đặt độ nhạy của người dùng
+  const threshold = useMemo(() => {
+    if (sensitivity === 'low') return { warning: 75, notice: 50 };
+    if (sensitivity === 'high') return { warning: 45, notice: 25 };
+    return { warning: 60, notice: 35 }; // Medium (Default)
+  }, [sensitivity]);
+
+  const isDuplicateWarning = highestScore >= threshold.warning;
+  const isDuplicateNotice = highestScore >= threshold.notice && highestScore < threshold.warning;
+
+  const handleExportDoc = () => {
+    if (!activeScript.content.trim()) return;
+    
+    const title = activeScript.title.trim() || 'Kịch bản TikTok chưa đặt tên';
+    const cleanTitle = title.replace(/[/\\?%*:|"<>\s]/g, '_');
+    
+    // Tạo cấu trúc HTML đạt chuẩn hiển thị của Microsoft Word & Google Docs
+    const documentTemplate = `
+      <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+      <head>
+        <title>${title}</title>
+        <meta charset="utf-8">
+        <style>
+          @page {
+            size: A4;
+            margin: 2cm;
+          }
+          body {
+            font-family: 'Times New Roman', Times, serif, 'Arial', sans-serif;
+            line-height: 1.6;
+            color: #000000;
+            padding: 20px;
+          }
+          .header-table {
+            width: 100%;
+            border-bottom: 2px solid #000000;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+          }
+          .doc-title {
+            font-size: 22pt;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 0;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+          }
+          .meta-info {
+            font-size: 10pt;
+            color: #555555;
+            text-align: center;
+            font-style: italic;
+          }
+          .content {
+            font-size: 13pt;
+            white-space: pre-wrap;
+            text-align: justify;
+            line-height: 1.8;
+          }
+          .footer {
+            margin-top: 60px;
+            font-size: 9pt;
+            text-align: center;
+            color: #888888;
+            border-top: 1px dashed #cccccc;
+            padding-top: 10px;
+          }
+        </style>
+      </head>
+      <body>
+        <table class="header-table">
+          <tr>
+            <td>
+              <h1 class="doc-title">${title}</h1>
+              <div class="meta-info">Ngày xuất: ${new Date().toLocaleDateString('vi-VN')} | Hệ thống quản lý TikTok Script AI v3</div>
+            </td>
+          </tr>
+        </table>
+        <div class="content">${activeScript.content.replace(/\n/g, '<br/>')}</div>
+        <div class="footer">Bản quyền kịch bản lưu trữ nội bộ - Được hỗ trợ bởi TikTok Script Engine</div>
+      </body>
+      </html>
+    `;
+
+    // Khởi tạo Blob với định dạng MIME của Microsoft Word (application/msword)
+    const blob = new Blob(['\ufeff' + documentTemplate], {
+      type: 'application/msword;charset=utf-8'
+    });
+    
+    // Tải xuống file bằng URL ảo
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${cleanTitle}.doc`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleSave = () => {
+    if (!activeScript.title.trim() && !activeScript.content.trim()) return;
+    const titleToSave = activeScript.title.trim() || 'Kịch bản chưa đặt tên';
+    
+    if (activeScript.id) {
+      setScripts(prev => prev.map(s => 
+        s.id === activeScript.id 
+          ? { ...s, title: titleToSave, content: activeScript.content, date: new Date().toISOString() }
+          : s
+      ));
+    } else {
+      const newScript = {
+        id: Date.now().toString(),
+        title: titleToSave,
+        content: activeScript.content,
+        date: new Date().toISOString()
+      };
+      setScripts([newScript, ...scripts]);
+      setActiveScript(newScript);
+    }
+
+    setShowNotification(true);
+    setTimeout(() => setShowNotification(false), 3000);
+  };
+
+  const handleCreateNew = () => {
+    setActiveScript({ id: null, title: '', content: '' });
+    setSelectedMatch(null);
+  };
+
+  const handleDelete = (id, e) => {
+    e.stopPropagation();
+    if (window.confirm("Bạn có chắc chắn muốn xóa kịch bản này khỏi kho lưu trữ?")) {
+      setScripts(prev => prev.filter(s => s.id !== id));
+      if (activeScript.id === id) {
+        handleCreateNew();
+      }
+    }
+  };
+
+  // Nạp Test Case viết lại để so sánh trực tiếp
+  const loadUserTestCase = () => {
+    setActiveScript({
+      id: null,
+      title: '3 Thói Quen Tiết Kiệm (Bản Viết Lại)',
+      content: 'Nếu là sinh viên và muốn chi tiêu thông minh hơn, bạn có thể bắt đầu từ 3 thói quen đơn giản này.\n\nMột là ưu tiên tự nấu ăn thay vì ăn ngoài thường xuyên.\nHai là tận dụng các đợt sale trên sàn thương mại điện tử để mua những món đồ thiết yếu.\nBa là áp dụng quy tắc 50/30/20 mỗi khi nhận tiền tiêu vặt hoặc lương làm thêm.\n\nLưu lại để áp dụng, và chia sẻ cho bạn bè cũng đang muốn tiết kiệm tiền nhé.'
+    });
+    setSelectedMatch(null);
+  };
+
+  return (
+    <div className="flex h-screen bg-slate-900 font-sans text-slate-100 overflow-hidden">
+      
+      {/* Toast báo lưu thành công */}
+      {showNotification && (
+        <div className="fixed bottom-5 right-5 z-50 bg-emerald-500 text-white px-5 py-3 rounded-xl shadow-2xl flex items-center gap-2 animate-bounce">
+          <CheckCircle2 size={20} />
+          <span className="font-semibold text-sm">Đã lưu kịch bản vào thiết bị!</span>
+        </div>
+      )}
+
+      {/* SIDEBAR */}
+      <div className="w-80 bg-slate-950 border-r border-slate-800 flex flex-col shrink-0">
+        <div className="p-4 border-b border-slate-800">
+          <div className="flex items-center justify-between mb-4">
+            <h1 className="text-md font-extrabold tracking-tight bg-gradient-to-r from-cyan-400 via-teal-400 to-emerald-400 bg-clip-text text-transparent flex items-center gap-2">
+              <Sparkles className="text-cyan-400 w-5 h-5" /> TikTok Script AI v3
+            </h1>
+            <span className="text-[10px] bg-slate-800 px-2 py-0.5 rounded text-cyan-400 font-mono">
+              Ultra-Precision
+            </span>
+          </div>
+
+          <button 
+            onClick={handleCreateNew}
+            className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-400 hover:to-teal-400 text-slate-950 font-bold p-2.5 rounded-xl transition-all shadow-lg hover:scale-[1.01]"
+          >
+            <Plus size={18} /> Viết kịch bản mới
+          </button>
+          
+          <div className="mt-3 relative">
+            <Search className="absolute left-3 top-3 text-slate-500" size={16} />
+            <input 
+              type="text" 
+              placeholder="Tìm kịch bản cũ..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-9 pr-3 py-2 bg-slate-900 border border-slate-800 rounded-xl text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-500"
+            />
+          </div>
+        </div>
+
+        {/* List kịch bản */}
+        <div className="flex-1 overflow-y-auto p-3 space-y-2.5">
+          <div className="flex items-center justify-between text-xs text-slate-400 px-1">
+            <span>Đã lưu ({filteredScripts.length})</span>
+            {scripts.length === 2 && (
+              <button 
+                onClick={loadUserTestCase}
+                className="text-cyan-400 hover:text-cyan-300 font-semibold flex items-center gap-1 transition text-[11px]"
+              >
+                ⚡ Thử test case viết lại
+              </button>
+            )}
+          </div>
+
+          {filteredScripts.length === 0 ? (
+            <div className="text-center py-8 text-slate-500 text-xs">Không tìm thấy kịch bản nào.</div>
+          ) : (
+            filteredScripts.map(script => (
+              <div 
+                key={script.id}
+                onClick={() => {
+                  setActiveScript(script);
+                  setSelectedMatch(null);
+                }}
+                className={`p-3 rounded-xl cursor-pointer transition-all border group relative
+                  ${activeScript.id === script.id 
+                    ? 'bg-slate-900 border-cyan-500/70 shadow-md shadow-cyan-950/20' 
+                    : 'bg-slate-950/40 border-slate-900 hover:border-slate-800 hover:bg-slate-900/30'}`}
+              >
+                <div className="flex justify-between items-start mb-1">
+                  <h3 className="font-semibold text-sm text-slate-200 truncate pr-6 group-hover:text-cyan-300">
+                    {script.title}
+                  </h3>
+                  <button 
+                    onClick={(e) => handleDelete(script.id, e)}
+                    className="absolute right-3 top-3 text-slate-600 hover:text-rose-400 opacity-0 group-hover:opacity-100 transition-all"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+                <p className="text-xs text-slate-400 line-clamp-2 mb-2 leading-relaxed">
+                  {script.content}
+                </p>
+                <div className="flex items-center gap-1 text-[10px] text-slate-500">
+                  <Clock size={10} />
+                  {new Date(script.date).toLocaleDateString('vi-VN')}
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+
+      {/* SOẠN THẢO TRUNG TÂM */}
+      <div className="flex-1 flex flex-col bg-slate-900 min-w-0">
+        <div className="h-16 flex items-center justify-between px-6 bg-slate-950 border-b border-slate-800 shrink-0">
+          <div className="flex items-center gap-3 flex-1 max-w-xl">
+            <FileText className="text-cyan-400 shrink-0" size={20} />
+            <input 
+              type="text"
+              placeholder="Tên tiêu đề kịch bản..."
+              value={activeScript.title}
+              onChange={(e) => setActiveScript(prev => ({ ...prev, title: e.target.value }))}
+              className="w-full text-base font-bold bg-transparent border-none focus:outline-none text-slate-100 placeholder-slate-600"
+            />
+          </div>
+          
+          {}
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={handleExportDoc}
+              disabled={!activeScript.content.trim()}
+              className="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed text-slate-200 px-4 py-2 rounded-xl font-semibold text-sm shadow-md transition-all border border-slate-700 active:scale-95"
+              title="Xuất kịch bản ra file Word (.doc) để in ấn"
+            >
+              <FileDown size={16} />
+              Xuất Word (.doc)
+            </button>
+            <button 
+              onClick={handleSave}
+              className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 px-4 py-2 rounded-xl font-bold text-sm shadow-md transition-all active:scale-95"
+            >
+              Lưu kịch bản
+            </button>
+          </div>
+        </div>
+
+        <div className="flex-1 overflow-hidden flex flex-row">
+          {/* Vùng Editor */}
+          <div className="flex-1 p-5 flex flex-col min-w-0">
+            <div className="flex-1 relative flex flex-col bg-slate-950 rounded-2xl border border-slate-800 overflow-hidden">
+              <div className="absolute top-3 left-4 text-[10px] font-mono text-slate-600 uppercase tracking-wider select-none">
+                Nội dung kịch bản
+              </div>
+              <textarea
+                placeholder="Nhập nội dung kịch bản TikTok..."
+                value={activeScript.content}
+                onChange={(e) => {
+                  setActiveScript(prev => ({ ...prev, content: e.target.value }));
+                  setSelectedMatch(null);
+                }}
+                className="flex-1 w-full pt-10 pb-6 px-5 bg-transparent border-none resize-none outline-none text-slate-200 text-base leading-relaxed placeholder-slate-700"
+              />
+            </div>
+          </div>
+
+          {/* PANEL PHÂN TÍCH TRÙNG LẶP */}
+          <div className="w-96 border-l border-slate-800 bg-slate-950 flex flex-col shrink-0 overflow-y-auto">
+            
+            {/* Header Phân Tích */}
+            <div className="p-4 border-b border-slate-800 bg-slate-950 sticky top-0 z-10 space-y-3">
+              <div className="flex items-center justify-between">
+                <h2 className="font-bold text-sm text-slate-300 flex items-center gap-2">
+                  <RefreshCw size={16} className="text-cyan-400 animate-spin-slow" />
+                  Kết Quả Quét Trùng Lặp
+                </h2>
+                <span className="text-[10px] text-slate-400 bg-slate-900 border border-slate-800 px-2 py-0.5 rounded-full">Thời gian thực</span>
+              </div>
+
+              {/* Điều Chỉnh Độ Nhạy (Sensitivity) */}
+              <div className="bg-slate-900 p-2 rounded-xl border border-slate-800/80">
+                <div className="flex items-center justify-between mb-1.5 px-1">
+                  <span className="text-xs text-slate-400 flex items-center gap-1">
+                    <Sliders size={12} className="text-cyan-500" /> Độ nhạy quét trùng
+                  </span>
+                  <span className="text-[11px] font-bold text-cyan-400">
+                    {sensitivity === 'low' ? 'Thấp (Quét reup)' : sensitivity === 'high' ? 'Cao (Chặt chẽ)' : 'Vừa phải'}
+                  </span>
+                </div>
+                <div className="grid grid-cols-3 gap-1">
+                  {['low', 'medium', 'high'].map(level => (
+                    <button
+                      key={level}
+                      onClick={() => setSensitivity(level)}
+                      className={`text-[10px] py-1 rounded-lg font-semibold transition-all uppercase
+                        ${sensitivity === level 
+                          ? 'bg-cyan-500 text-slate-950 shadow-sm' 
+                          : 'bg-slate-950 hover:bg-slate-800 text-slate-400'}`}
+                    >
+                      {level === 'low' ? 'Thấp' : level === 'high' ? 'Cao' : 'Vừa'}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+            
+            <div className="p-4 space-y-4">
+              {!activeScript.content.trim() ? (
+                <div className="text-center text-slate-500 py-16 px-4">
+                  <FileText className="text-cyan-500/30 w-10 h-10 mx-auto mb-3" />
+                  <h4 className="font-semibold text-xs text-slate-400 mb-1">Hãy bắt đầu viết kịch bản</h4>
+                  <p className="text-[11px] text-slate-500 max-w-xs mx-auto">
+                    Hệ thống phân tích cụm từ tiếng Việt kép sẽ đối chiếu và cảnh báo trùng lặp ngay khi bạn gõ.
+                  </p>
+                </div>
+              ) : (
+                <>
+                  {/* TRẠNG THÁI TỔNG QUAN TỪ THUẬT TOÁN V3 */}
+                  <div className={`p-4 rounded-xl border transition-all duration-300
+                    ${isDuplicateWarning ? 'bg-rose-950/20 border-rose-800/60 text-rose-200' : 
+                      isDuplicateNotice ? 'bg-amber-950/20 border-amber-800/60 text-amber-200' : 
+                      'bg-emerald-950/20 border-emerald-800/60 text-emerald-200'}`}
+                  >
+                    <div className="flex items-start gap-3">
+                      {isDuplicateWarning ? <AlertTriangle className="text-rose-400 shrink-0 mt-0.5" size={18} /> : 
+                       isDuplicateNotice ? <AlertTriangle className="text-amber-400 shrink-0 mt-0.5" size={18} /> : 
+                       <CheckCircle2 className="text-emerald-400 shrink-0 mt-0.5" size={18} />}
+                      
+                      <div className="space-y-1">
+                        <h4 className="font-bold text-sm">
+                          {isDuplicateWarning ? `Trùng lặp cao! (${highestScore}%)` : 
+                           isDuplicateNotice ? `Độ tương đồng nhẹ! (${highestScore}%)` : 
+                           `Nội dung an toàn! (${highestScore}%)`}
+                        </h4>
+                        <p className="text-[11px] leading-relaxed opacity-90">
+                          {isDuplicateWarning ? 'Kịch bản trùng lặp quá nhiều ý tưởng & từ khóa đặc trưng từ bản lưu cũ. Nên viết lại cấu trúc câu.' : 
+                           isDuplicateNotice ? 'Cấu trúc câu có nét tương đồng nhẹ với bài cũ. Bạn có thể biến tấu thêm vài từ đồng nghĩa.' : 
+                           'Rất tốt! Không phát hiện trùng lặp chủ đề nào đáng kể với kịch bản cũ.'}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="mt-3 bg-slate-900/80 rounded-full h-1.5 overflow-hidden border border-slate-800">
+                      <div 
+                        className={`h-full rounded-full transition-all duration-500 ${
+                          isDuplicateWarning ? 'bg-rose-500' : 
+                          isDuplicateNotice ? 'bg-amber-500' : 'bg-emerald-500'
+                        }`}
+                        style={{ width: `${highestScore}%` }}
+                      ></div>
+                    </div>
+                  </div>
+
+                  {/* THÔNG TIN CHI TIẾT CÁC CỤM TỪ TRÙNG KHỚP */}
+                  {highestMatch && highestMatch.commonPhrases.length > 0 && (
+                    <div className="bg-slate-900/50 rounded-xl p-3 border border-slate-800/60">
+                      <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                        <ListCollapse size={13} className="text-cyan-400" /> 
+                        Cụm từ bị lặp cốt lõi:
+                      </h4>
+                      <p className="text-[10px] text-slate-500 mb-2">Hệ thống phát hiện các cụm từ đặc trưng này trùng khớp:</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {highestMatch.commonPhrases.map((phrase, idx) => (
+                          <span key={idx} className="bg-slate-800 hover:bg-slate-700 text-cyan-300 text-[11px] px-2 py-0.5 rounded-md border border-cyan-950 font-mono">
+                            "{phrase}"
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* HIỂN THỊ CÁC BẢN SO KHỚP CỤ THỂ */}
+                  <div>
+                    <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2.5">
+                      Đối chiếu kịch bản tương đồng:
+                    </h4>
+                    
+                    {similarityResults.length === 0 ? (
+                      <div className="text-xs text-slate-500 italic p-2">Không phát hiện tương đồng đáng kể nào.</div>
+                    ) : (
+                      <div className="space-y-2.5">
+                        {similarityResults.slice(0, 3).map(result => (
+                          <div 
+                            key={result.id} 
+                            onClick={() => setSelectedMatch(result)}
+                            className={`bg-slate-900/30 p-3 rounded-xl border cursor-pointer transition-all duration-200
+                              ${selectedMatch?.id === result.id 
+                                ? 'border-cyan-500 bg-slate-900/60 shadow-md' 
+                                : 'border-slate-900 hover:border-slate-800/80 hover:bg-slate-900/40'}`}
+                          >
+                            <div className="flex justify-between items-center mb-1.5">
+                              <h5 className="font-semibold text-xs text-slate-200 truncate pr-2">
+                                {result.title}
+                              </h5>
+                              <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full border
+                                ${result.score >= threshold.warning ? 'bg-rose-500/10 text-rose-400 border-rose-500/20' : 
+                                  result.score >= threshold.notice ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' : 
+                                  'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'}`}
+                              >
+                                {result.score}% khớp
+                              </span>
+                            </div>
+                            
+                            <p className="text-[11px] text-slate-500 line-clamp-2 leading-relaxed">
+                              {result.content}
+                            </p>
+
+                            <div className="mt-2 flex items-center justify-between text-[10px] text-cyan-400 font-medium">
+                              <span>Xem so sánh chi tiết song song →</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* MODAL ĐỐI CHIẾU CHI TIẾT SONG SONG */}
+      {selectedMatch && (
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-6">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-4xl max-h-[85vh] flex flex-col shadow-2xl">
+            
+            <div className="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-950/50">
+              <div>
+                <h3 className="font-extrabold text-slate-200 flex items-center gap-2 text-sm">
+                  <Eye className="text-cyan-400" size={16} /> Đối chiếu cấu trúc kịch bản V3
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Đang kiểm tra chéo với: <span className="text-cyan-400">"{selectedMatch.title}"</span>
+                </p>
+              </div>
+              <button 
+                onClick={() => setSelectedMatch(null)}
+                className="bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg text-xs font-semibold transition"
+              >
+                Đóng đối chiếu
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-5 grid grid-cols-2 gap-5">
+              
+              {/* Cột Trái: Bản thảo mới đang viết */}
+              <div className="flex flex-col space-y-2">
+                <span className="text-xs font-bold text-cyan-400 flex items-center gap-1 uppercase tracking-wider">
+                  ✍️ Bản thảo hiện tại
+                </span>
+                <div className="flex-1 bg-slate-950 p-4 rounded-xl border border-slate-800/80 text-xs leading-relaxed text-slate-300 whitespace-pre-wrap font-mono max-h-96 overflow-y-auto">
+                  {tokenize(activeScript.content).map((word, i) => {
+                    // Xem từ này có nằm trong cụm từ trùng lặp nào không
+                    const cleanWord = word.toLowerCase();
+                    const isPartOfPhrase = selectedMatch.commonPhrases.some(p => p.includes(cleanWord) && cleanWord.length > 1);
+                    
+                    return (
+                      <span 
+                        key={i} 
+                        className={`inline-block mr-1 my-0.5 px-0.5 rounded ${
+                          isPartOfPhrase ? 'bg-cyan-950/80 text-cyan-300 font-bold border-b border-cyan-400' : ''
+                        }`}
+                      >
+                        {word}
+                      </span>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Cột Phải: Bản cũ lưu trữ */}
+              <div className="flex flex-col space-y-2">
+                <span className="text-xs font-bold text-emerald-400 flex items-center gap-1 uppercase tracking-wider">
+                  📚 Bản gốc lưu trữ ({selectedMatch.score}% trùng khớp)
+                </span>
+                <div className="flex-1 bg-slate-950 p-4 rounded-xl border border-slate-800/80 text-xs leading-relaxed text-slate-400 whitespace-pre-wrap font-mono max-h-96 overflow-y-auto">
+                  {tokenize(selectedMatch.content).map((word, i) => {
+                    const cleanWord = word.toLowerCase();
+                    const isPartOfPhrase = selectedMatch.commonPhrases.some(p => p.includes(cleanWord) && cleanWord.length > 1);
+
+                    return (
+                      <span 
+                        key={i} 
+                        className={`inline-block mr-1 my-0.5 px-0.5 rounded ${
+                          isPartOfPhrase ? 'bg-cyan-950/50 text-cyan-400 font-bold border-b border-cyan-600' : ''
+                        }`}
+                      >
+                        {word}
+                      </span>
+                    );
+                  })}
+                </div>
+              </div>
+
+            </div>
+
+            <div className="p-4 border-t border-slate-800 bg-slate-950/30 flex items-start gap-3">
+              <Info className="text-cyan-400 shrink-0 mt-0.5" size={16} />
+              <p className="text-[11px] text-slate-400 leading-relaxed">
+                <strong className="text-cyan-300">Giải pháp từ thuật toán V3:</strong> Để làm giảm tỉ lệ trùng lặp hiệu quả, hãy thay đổi cấu trúc cụm từ ghép bị tô sáng (Ví dụ: thay cụm <span className="text-cyan-400 italic">"tự nấu ăn"</span> bằng <span className="text-cyan-400 italic">"chuẩn bị đồ ăn tại nhà"</span>; thay cụm <span className="text-cyan-400 italic">"tiết kiệm tiền"</span> thành <span className="text-cyan-400 italic">"tích lũy tài chính"</span>). Điều này sẽ làm giảm chỉ số lặp Bigram xuống tối đa.
+              </p>
+            </div>
+
+          </div>
+        </div>
+      )}
+
+    </div>
+  );
+}
